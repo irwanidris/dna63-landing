@@ -21,6 +21,7 @@ export default function Home() {
       <Head>
         <title>DNA63 | Platform Literasi Hak Sabah</title>
         <meta name="description" content="Platform rasmi DNA63 untuk literasi MA63 dan Perlembagaan Persekutuan." />
+        <link rel="icon" href="/images/logo_dna63.png" />
       </Head>
 
       <AnimatePresence>
