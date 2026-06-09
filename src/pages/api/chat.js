@@ -17,38 +17,43 @@ export default async function handler(req, res) {
     const kbPath = path.join(process.cwd(), 'src/data/dna63_framework.json');
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
 
-    // Carian Konteks yang sangat spesifik
+    // Carian Konteks yang lebih dinamik
     const findBestContext = (query, base) => {
       const q = query.toLowerCase();
-      // Force match untuk kata kunci kritikal
-      if (q.includes("20") || q.includes("dua puluh")) {
-        return base.knowledge_base.find(i => i.topic.includes("20"))?.content;
-      }
-      if (q.includes("ma63")) {
-        return base.knowledge_base.find(i => i.topic.includes("MA63"))?.content;
-      }
 
-      // Fallback carian biasa
+      // 1. Prioriti match untuk kata kunci spesifik
+      if (q.includes("veto 2")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto 2"))?.content;
+      if (q.includes("veto")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto (2025)"))?.content;
+      if (q.includes("20 perkara") || q.includes("dua puluh")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("20 perkara"))?.content;
+      if (q.includes("40%") || q.includes("empat puluh peratus")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("40%"))?.content;
+      if (q.includes("ma63")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("ma63"))?.content;
+      if (q.includes("kendadu")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("kendadu"))?.content;
+      if (q.includes("surat dari london") || q.includes("london")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("london"))?.content;
+
+      // 2. Carian fleksibel untuk perkataan lain
       const match = base.knowledge_base.find(item => {
         const topic = item.topic.toLowerCase();
-        return q.split(' ').some(word => word.length > 4 && topic.includes(word));
+        const content = item.content.toLowerCase();
+        return q.split(' ').some(word => word.length > 2 && (topic.includes(word) || content.includes(word)));
       });
+
       return match ? match.content : "";
     };
 
     const relevantContext = findBestContext(message, kbData);
 
     const systemPrompt = `
-      PERANAN: Anda adalah DNA63 AI, pembantu teknikal untuk literasi perlembagaan Sabah.
+      PERANAN: Anda adalah DNA63 AI, pakar sejarah MA63 dan perjuangan hak perlembagaan Sabah.
 
-      ARAHAN UTAMA (WAJIB PATUH):
-      1. ANDA HANYA BOLEH MENJAWAB BERDASARKAN "KONTEKS RUJUKAN" DI BAWAH.
-      2. JANGAN GUNAKAN PENGETAHUAN LUAR ANDA (Terutamanya jangan sebut pasal PKMM, Malaya 1947, atau fakta internet lain).
-      3. JIKA MAKLUMAT TIADA DALAM KONTEKS, JAWAB: "Maaf, fakta sejarah khusus mengenai ini boleh didapati di dalam koleksi buku DNA63."
-      4. 20 PERKARA ADALAH MEMORANDUM SABAH 1962, BUKAN PERJANJIAN, BUKAN DARI MALAYA.
-
-      KONTEKS RUJUKAN:
+      KONTEKS RUJUKAN UTAMA:
       ${relevantContext}
+
+      ARAHAN (SANGAT PENTING):
+      1. Jika KONTEKS RUJUKAN di atas memberikan maklumat, anda WAJIB menjawab berdasarkan maklumat tersebut secara terperinci tetapi padat.
+      2. Jangan sesekali menggunakan fakta sejarah umum dari internet yang bercanggah dengan rujukan di atas.
+      3. JANGAN sebut tentang PKMM atau Malaya 1947 jika orang tanya pasal 20 Perkara. 20 Perkara adalah Memorandum Sabah 1962.
+      4. Jika maklumat tiada dalam konteks tetapi soalan berkaitan DNA63 atau MA63, gunakan nada yang bijaksana: "Berdasarkan kerangka DNA63, perkara ini sering dikaitkan dengan perjuangan literasi hak kita. Walau bagaimanapun, perincian sejarah yang lebih mendalam boleh didapati di dalam siri buku VETO, KENDADU, dan MA63 TC."
+      5. Jawab dalam Bahasa Melayu yang matang dan berautoriti.
     `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -61,10 +66,10 @@ export default async function handler(req, res) {
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: `Berdasarkan konteks rujukan sahaja, ${message}` }
+          { role: "user", content: message }
         ],
-        temperature: 0.0,
-        max_tokens: 200,
+        temperature: 0.2, // Naikkan sikit untuk "kebijaksanaan" bahasa, tetapi kekal faktual.
+        max_tokens: 300,
       }),
     });
 
