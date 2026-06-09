@@ -17,17 +17,20 @@ export default async function handler(req, res) {
     const kbPath = path.join(process.cwd(), 'src/data/dna63_framework.json');
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
 
-    // Carian Konteks yang lebih tepat
+    // Carian Konteks yang sangat spesifik
     const findBestContext = (query, base) => {
       const q = query.toLowerCase();
-      // Cari tajuk yang paling sepadan
+      // Force match untuk kata kunci kritikal
+      if (q.includes("20") || q.includes("dua puluh")) {
+        return base.knowledge_base.find(i => i.topic.includes("20"))?.content;
+      }
+      if (q.includes("ma63")) {
+        return base.knowledge_base.find(i => i.topic.includes("MA63"))?.content;
+      }
+
+      // Fallback carian biasa
       const match = base.knowledge_base.find(item => {
         const topic = item.topic.toLowerCase();
-        // Check for specific numbers or key phrases
-        if (q.includes("20") && topic.includes("20")) return true;
-        if (q.includes("ma63") && topic.includes("ma63")) return true;
-        if (q.includes("veto") && topic.includes("veto")) return true;
-        if (q.includes("kendadu") && topic.includes("kendadu")) return true;
         return q.split(' ').some(word => word.length > 4 && topic.includes(word));
       });
       return match ? match.content : "";
@@ -36,13 +39,13 @@ export default async function handler(req, res) {
     const relevantContext = findBestContext(message, kbData);
 
     const systemPrompt = `
-      Anda adalah DNA63 AI. Anda WAJIB menjawab menggunakan KONTEKS RUJUKAN di bawah.
+      PERANAN: Anda adalah DNA63 AI, pembantu teknikal untuk literasi perlembagaan Sabah.
 
-      PERATURAN KERAS:
-      1. JANGAN gunakan pengetahuan umum anda tentang Malaysia/Sabah jika ia bercanggah dengan KONTEKS RUJUKAN.
-      2. JANGAN panggil 20 Perkara sebagai "Perjanjian" atau "Signed Agreement". Ia adalah MEMORANDUM.
-      3. Jawab dalam 1-2 perenggan sahaja. Terus kepada fakta.
-      4. Jika soalan tiada kaitan dengan konteks, jawab: "Maaf, sila rujuk buku-buku DNA63 untuk fakta sejarah yang sahih."
+      ARAHAN UTAMA (WAJIB PATUH):
+      1. ANDA HANYA BOLEH MENJAWAB BERDASARKAN "KONTEKS RUJUKAN" DI BAWAH.
+      2. JANGAN GUNAKAN PENGETAHUAN LUAR ANDA (Terutamanya jangan sebut pasal PKMM, Malaya 1947, atau fakta internet lain).
+      3. JIKA MAKLUMAT TIADA DALAM KONTEKS, JAWAB: "Maaf, fakta sejarah khusus mengenai ini boleh didapati di dalam koleksi buku DNA63."
+      4. 20 PERKARA ADALAH MEMORANDUM SABAH 1962, BUKAN PERJANJIAN, BUKAN DARI MALAYA.
 
       KONTEKS RUJUKAN:
       ${relevantContext}
@@ -58,15 +61,15 @@ export default async function handler(req, res) {
         model: "llama-3.3-70b-versatile",
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: message }
+          { role: "user", content: `Berdasarkan konteks rujukan sahaja, ${message}` }
         ],
         temperature: 0.0,
-        max_tokens: 180,
+        max_tokens: 200,
       }),
     });
 
     const data = await response.json();
-    const answer = data.choices[0]?.message?.content || "Maaf, berlaku ralat teknikal.";
+    const answer = data.choices[0]?.message?.content || "Maaf, sila rujuk buku-buku DNA63.";
 
     res.status(200).json({ answer: answer });
 
