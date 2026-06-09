@@ -17,31 +17,31 @@ export default async function handler(req, res) {
     const kbPath = path.join(process.cwd(), 'src/data/dna63_framework.json');
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
 
-    const findRelevantContext = (query, base) => {
+    // Carian hanya pada SATU topik yang paling relevan sahaja
+    const findBestContext = (query, base) => {
       const keywords = query.toLowerCase().split(' ');
-      return base.knowledge_base
+      const matches = base.knowledge_base
         .filter(item => {
-          const content = (item.topic + " " + item.content).toLowerCase();
-          return keywords.some(word => word.length > 2 && content.includes(word));
-        })
-        .map(item => item.content)
-        .join('\n\n');
+          const topic = item.topic.toLowerCase();
+          return keywords.some(word => word.length > 3 && topic.includes(word));
+        });
+
+      // Ambil yang pertama sahaja untuk elakkan info-dumping
+      return matches.length > 0 ? matches[0].content : "";
     };
 
-    const relevantContext = findRelevantContext(message, kbData);
+    const relevantContext = findBestContext(message, kbData);
 
     const systemPrompt = `
-      Anda adalah Pembantu AI DNA63 (Tanya DNA63).
-      Tugas anda adalah memberikan jawapan yang RINGKAS, TEPAT, dan PADAT berdasarkan kajian Saudara Irwan Idris.
+      Anda adalah DNA63 AI. Jawab soalan dengan SANGAT RINGKAS DAN TERUS (Strictly 1-2 perenggan sahaja).
 
-      PERATURAN JAWAPAN (WAJIB):
-      1. JAWAB APA YANG DITANYA SAHAJA: Jika ditanya "Apa itu MA63", jelaskan definisinya sahaja. Jangan sebut tentang 22 sesi IGC atau Lee Kuan Yew kecuali ditanya.
-      2. LAYERED KNOWLEDGE: Simpan fakta-fakta teknikal (seperti Telegram British, Marlborough House, atau G.S. Sundang) untuk soalan yang spesifik mengenainya.
-      3. MAKSIMUM 2-3 PERENGGAN: Jangan beri jawapan panjang lebar. Pengguna mahu jawapan yang mudah dibaca.
-      4. NADA: Serius dan berilmu, seperti seorang pakar yang menjawab dengan tenang.
-      5. RUJUKAN: Sebutkan buku rujukan secara ringkas di hujung jawapan jika perlu sebagai pengukuh fakta.
+      PERATURAN MUTLAK:
+      1. JANGAN sebut buku VETO, KENDADU, atau IGC jika tidak ditanya secara spesifik.
+      2. JANGAN buat rumusan atau ulasan tambahan di hujung jawapan.
+      3. Jika maklumat tiada dalam konteks di bawah, jawab: "Maaf, sila rujuk buku-buku DNA63 untuk maklumat lanjut."
+      4. Gunakan gaya bahasa fakta yang kering dan tepat.
 
-      KONTEKS DNA63:
+      KONTEKS RUJUKAN:
       ${relevantContext}
     `;
 
@@ -57,7 +57,8 @@ export default async function handler(req, res) {
           { role: "system", content: systemPrompt },
           { role: "user", content: message }
         ],
-        temperature: 0.1,
+        temperature: 0.0, // Kosongkan terus supaya tiada kreativiti
+        max_tokens: 150,  // Hadkan jumlah perkataan
       }),
     });
 
