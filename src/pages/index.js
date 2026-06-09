@@ -37,16 +37,17 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative bg-white dark:bg-gray-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row"
+              className="relative bg-white dark:bg-gray-900 w-[90%] max-w-2xl max-h-[80vh] overflow-hidden rounded-[2rem] shadow-2xl flex flex-col md:flex-row border border-white/10"
             >
               <button
                 onClick={() => setShowPopup(false)}
-                className="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-colors"
+                className="absolute top-4 right-4 z-[110] w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-sabah-red transition-all shadow-lg"
+                aria-label="Close popup"
               >
-                ✕
+                <span className="text-xl font-bold">✕</span>
               </button>
 
-              <div className="w-full md:w-1/2 aspect-[3/4] relative bg-sabah-blue/10">
+              <div className="w-full md:w-1/2 aspect-[4/3] md:aspect-[3/4] relative bg-sabah-blue/10">
                 <Image
                   src="/images/surat_dari_london.png"
                   alt="Surat Dari London Limited Edition"
@@ -55,19 +56,19 @@ export default function Home() {
                 />
               </div>
 
-              <div className="w-full md:w-1/2 p-8 flex flex-col justify-center">
-                <span className="text-sabah-red font-bold text-sm tracking-widest uppercase mb-2">Limited Edition</span>
-                <h2 className="text-2xl font-bold mb-4 text-sabah-blue">Surat Dari London</h2>
-                <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+              <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center overflow-y-auto">
+                <span className="text-sabah-red font-bold text-[10px] md:text-sm tracking-widest uppercase mb-1 md:mb-2">Limited Edition</span>
+                <h2 className="text-lg md:text-2xl font-bold mb-2 md:mb-4 text-sabah-blue">Surat Dari London</h2>
+                <p className="text-[11px] md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 md:mb-6">
                   Membongkar rahsia surat menyurat antara Kerajaan selepas Singapura berpisah dari Persekutuan yang jelas ada usaha mengubah Perjanjian Malaysia yang ditandatangani pada 9 Julai 1963.
-                  <br /><br />
+                  <br /><br className="hidden md:block" />
                   Surat-surat ini memberi jawapan kenapa perubahan besar dibuat seperti yang didokumentasikan di dalam buku <strong>KENDADU</strong>.
                 </p>
                 <div className="mt-auto">
-                  <p className="text-xs text-sabah-blue font-bold mb-3 italic">Eksklusif untuk Verified Members di Apps DNA63 sahaja.</p>
+                  <p className="text-[9px] md:text-xs text-sabah-blue font-bold mb-2 md:mb-3 italic">Eksklusif untuk Verified Members di Apps DNA63 sahaja.</p>
                   <Link
                     href="https://app.dna63.com"
-                    className="block w-full py-3 bg-sabah-blue text-white text-center rounded-xl font-bold hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/30"
+                    className="block w-full py-2.5 md:py-3 bg-sabah-blue text-white text-center rounded-xl font-bold text-xs md:text-base hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/30"
                   >
                     Masuk Apps & Tebus
                   </Link>
