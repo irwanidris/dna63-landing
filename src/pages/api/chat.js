@@ -20,12 +20,17 @@ export default async function handler(req, res) {
     const findBestContext = (query, base) => {
       const q = query.toLowerCase();
 
-      // 1. Prioriti match untuk tarikh kritikal 31 Julai 1962
+      // 1. Prioriti match untuk IGC
+      if (q.includes("igc") || q.includes("intergovernmental committee")) {
+        return base.knowledge_base.find(i => i.topic.includes("IGC"))?.content;
+      }
+
+      // 2. Prioriti match untuk tarikh kritikal 31 Julai 1962
       if (q.includes("31 julai 1962") || q.includes("31 july 1962")) {
         return base.knowledge_base.find(i => i.topic.includes("31 Julai 1962"))?.content;
       }
 
-      // 2. Match spesifik lain
+      // 3. Match spesifik lain
       if (q.includes("veto 2")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto 2"))?.content;
       if (q.includes("veto")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto (2025)"))?.content;
       if (q.includes("20 perkara") || q.includes("dua puluh")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("20 perkara"))?.content;
@@ -49,7 +54,7 @@ export default async function handler(req, res) {
       1. Jawab SANGAT RINGKAS DAN PADAT berdasarkan KONTEKS RUJUKAN sahaja.
       2. Ikut naratif DNA63 secara verbatim (tepat).
       3. Jangan gunakan maklumat luar.
-      4. Jika ditanya tentang peristiwa selepas 31 Julai 1962, pastikan jawapan membawa kepada buku VETO 2 hasil tulisan IRWAN IDRIS secara ringkas.
+      4. Jika ditanya tentang IGC atau Intergovernmental Committee, gunakan definisi tentang Perjanjian Rahsia 31 Julai 1962 dan Annex A secara tepat.
 
       KONTEKS RUJUKAN:
       ${relevantContext}
@@ -68,7 +73,7 @@ export default async function handler(req, res) {
           { role: "user", content: message }
         ],
         temperature: 0.0,
-        max_tokens: 300,
+        max_tokens: 400,
       }),
     });
 
