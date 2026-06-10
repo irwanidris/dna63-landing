@@ -17,31 +17,21 @@ export default async function handler(req, res) {
     const kbPath = path.join(process.cwd(), 'src/data/dna63_framework.json');
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
 
-    // Carian Konteks yang sangat tepat mengikut naratif DNA63
     const findBestContext = (query, base) => {
       const q = query.toLowerCase();
 
-      // Force match untuk buku VETO 2 dahulu supaya tak keliru dengan VETO 1
-      if (q.includes("veto 2")) {
-        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto 2"))?.content;
-      }
-      if (q.includes("veto")) {
-        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto (2025)"))?.content;
-      }
-      if (q.includes("20 perkara") || q.includes("dua puluh")) {
-        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("20 perkara"))?.content;
-      }
-      if (q.includes("ma63")) {
-        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("ma63"))?.content;
-      }
-      if (q.includes("kendadu")) {
-        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("kendadu"))?.content;
-      }
-      if (q.includes("surat dari london") || q.includes("london")) {
-        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("london"))?.content;
+      // 1. Prioriti match untuk tarikh kritikal 31 Julai 1962
+      if (q.includes("31 julai 1962") || q.includes("31 july 1962")) {
+        return base.knowledge_base.find(i => i.topic.includes("31 Julai 1962"))?.content;
       }
 
-      // Fallback carian kata kunci
+      // 2. Match spesifik lain
+      if (q.includes("veto 2")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto 2"))?.content;
+      if (q.includes("veto")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto (2025)"))?.content;
+      if (q.includes("20 perkara") || q.includes("dua puluh")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("20 perkara"))?.content;
+      if (q.includes("ma63")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("ma63"))?.content;
+
+      // Fallback
       const match = base.knowledge_base.find(item => {
         const topic = item.topic.toLowerCase();
         return q.split(' ').some(word => word.length > 3 && topic.includes(word));
@@ -53,14 +43,13 @@ export default async function handler(req, res) {
     const relevantContext = findBestContext(message, kbData);
 
     const systemPrompt = `
-      PERANAN: Anda adalah DNA63 AI, wakil digital bagi perjuangan literasi hak perlembagaan Sabah.
+      PERANAN: Anda adalah DNA63 AI.
 
       ARAHAN UTAMA:
-      1. Anda WAJIB menjawab menggunakan KONTEKS RUJUKAN di bawah.
-      2. Gunakan ayat yang diberikan dalam KONTEKS RUJUKAN secara hampir verbatim (bulat-bulat) untuk definisi buku atau sejarah.
-      3. JANGAN menambah ulasan "buku ini sangat berguna" atau ulasan umum AI yang lain.
-      4. JANGAN sesekali keliru antara VETO (Buku 1) dan VETO 2. Ikut perincian dalam rujukan.
-      5. Jika maklumat tiada dalam rujukan, jawab: "Maaf, perincian sejarah ini boleh didapati di dalam koleksi buku DNA63."
+      1. Jawab SANGAT RINGKAS DAN PADAT berdasarkan KONTEKS RUJUKAN sahaja.
+      2. Ikut naratif DNA63 secara verbatim (tepat).
+      3. Jangan gunakan maklumat luar.
+      4. Jika ditanya tentang peristiwa selepas 31 Julai 1962, pastikan jawapan membawa kepada buku VETO 2 hasil tulisan IRWAN IDRIS secara ringkas.
 
       KONTEKS RUJUKAN:
       ${relevantContext}
@@ -78,8 +67,8 @@ export default async function handler(req, res) {
           { role: "system", content: systemPrompt },
           { role: "user", content: message }
         ],
-        temperature: 0.0, // Strict adherence to context
-        max_tokens: 400,
+        temperature: 0.0,
+        max_tokens: 300,
       }),
     });
 
