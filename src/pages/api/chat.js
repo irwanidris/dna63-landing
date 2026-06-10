@@ -17,24 +17,34 @@ export default async function handler(req, res) {
     const kbPath = path.join(process.cwd(), 'src/data/dna63_framework.json');
     const kbData = JSON.parse(fs.readFileSync(kbPath, 'utf8'));
 
-    // Carian Konteks yang lebih dinamik
+    // Carian Konteks yang sangat tepat mengikut naratif DNA63
     const findBestContext = (query, base) => {
       const q = query.toLowerCase();
 
-      // 1. Prioriti match untuk kata kunci spesifik
-      if (q.includes("veto 2")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto 2"))?.content;
-      if (q.includes("veto")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto (2025)"))?.content;
-      if (q.includes("20 perkara") || q.includes("dua puluh")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("20 perkara"))?.content;
-      if (q.includes("40%") || q.includes("empat puluh peratus")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("40%"))?.content;
-      if (q.includes("ma63")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("ma63"))?.content;
-      if (q.includes("kendadu")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("kendadu"))?.content;
-      if (q.includes("surat dari london") || q.includes("london")) return base.knowledge_base.find(i => i.topic.toLowerCase().includes("london"))?.content;
+      // Force match untuk buku VETO 2 dahulu supaya tak keliru dengan VETO 1
+      if (q.includes("veto 2")) {
+        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto 2"))?.content;
+      }
+      if (q.includes("veto")) {
+        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("veto (2025)"))?.content;
+      }
+      if (q.includes("20 perkara") || q.includes("dua puluh")) {
+        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("20 perkara"))?.content;
+      }
+      if (q.includes("ma63")) {
+        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("ma63"))?.content;
+      }
+      if (q.includes("kendadu")) {
+        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("kendadu"))?.content;
+      }
+      if (q.includes("surat dari london") || q.includes("london")) {
+        return base.knowledge_base.find(i => i.topic.toLowerCase().includes("london"))?.content;
+      }
 
-      // 2. Carian fleksibel untuk perkataan lain
+      // Fallback carian kata kunci
       const match = base.knowledge_base.find(item => {
         const topic = item.topic.toLowerCase();
-        const content = item.content.toLowerCase();
-        return q.split(' ').some(word => word.length > 2 && (topic.includes(word) || content.includes(word)));
+        return q.split(' ').some(word => word.length > 3 && topic.includes(word));
       });
 
       return match ? match.content : "";
@@ -43,17 +53,17 @@ export default async function handler(req, res) {
     const relevantContext = findBestContext(message, kbData);
 
     const systemPrompt = `
-      PERANAN: Anda adalah DNA63 AI, pakar sejarah MA63 dan perjuangan hak perlembagaan Sabah.
+      PERANAN: Anda adalah DNA63 AI, wakil digital bagi perjuangan literasi hak perlembagaan Sabah.
 
-      KONTEKS RUJUKAN UTAMA:
+      ARAHAN UTAMA:
+      1. Anda WAJIB menjawab menggunakan KONTEKS RUJUKAN di bawah.
+      2. Gunakan ayat yang diberikan dalam KONTEKS RUJUKAN secara hampir verbatim (bulat-bulat) untuk definisi buku atau sejarah.
+      3. JANGAN menambah ulasan "buku ini sangat berguna" atau ulasan umum AI yang lain.
+      4. JANGAN sesekali keliru antara VETO (Buku 1) dan VETO 2. Ikut perincian dalam rujukan.
+      5. Jika maklumat tiada dalam rujukan, jawab: "Maaf, perincian sejarah ini boleh didapati di dalam koleksi buku DNA63."
+
+      KONTEKS RUJUKAN:
       ${relevantContext}
-
-      ARAHAN (SANGAT PENTING):
-      1. Jika KONTEKS RUJUKAN di atas memberikan maklumat, anda WAJIB menjawab berdasarkan maklumat tersebut secara terperinci tetapi padat.
-      2. Jangan sesekali menggunakan fakta sejarah umum dari internet yang bercanggah dengan rujukan di atas.
-      3. JANGAN sebut tentang PKMM atau Malaya 1947 jika orang tanya pasal 20 Perkara. 20 Perkara adalah Memorandum Sabah 1962.
-      4. Jika maklumat tiada dalam konteks tetapi soalan berkaitan DNA63 atau MA63, gunakan nada yang bijaksana: "Berdasarkan kerangka DNA63, perkara ini sering dikaitkan dengan perjuangan literasi hak kita. Walau bagaimanapun, perincian sejarah yang lebih mendalam boleh didapati di dalam siri buku VETO, KENDADU, dan MA63 TC."
-      5. Jawab dalam Bahasa Melayu yang matang dan berautoriti.
     `;
 
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -68,8 +78,8 @@ export default async function handler(req, res) {
           { role: "system", content: systemPrompt },
           { role: "user", content: message }
         ],
-        temperature: 0.2, // Naikkan sikit untuk "kebijaksanaan" bahasa, tetapi kekal faktual.
-        max_tokens: 300,
+        temperature: 0.0, // Strict adherence to context
+        max_tokens: 400,
       }),
     });
 
