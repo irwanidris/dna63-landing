@@ -3,11 +3,34 @@ import { motion, AnimatePresence } from 'motion/react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/router'
 
 const MotionLink = motion.create(Link)
 
 export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
+  const router = useRouter();
+  const [referralId, setReferralId] = useState(null);
+
+  useEffect(() => {
+    // Check for referral ID in URL
+    if (router.isReady) {
+      const { ref } = router.query;
+      if (ref) {
+        setReferralId(ref);
+        localStorage.setItem('dna63_ref', ref);
+      } else {
+        // Fallback to localStorage if no ref in URL
+        const savedRef = localStorage.getItem('dna63_ref');
+        if (savedRef) setReferralId(savedRef);
+      }
+    }
+  }, [router.isReady, router.query]);
+
+  // Dynamic link for the app portal
+  const appLink = referralId
+    ? `https://app.dna63.com?ref=${referralId}`
+    : "https://app.dna63.com";
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -68,7 +91,7 @@ export default function Home() {
                 <div className="mt-auto">
                   <p className="text-[9px] md:text-xs text-sabah-blue font-bold mb-2 md:mb-3 italic">Eksklusif untuk Verified Members di Apps DNA63 sahaja.</p>
                   <Link
-                    href="https://app.dna63.com"
+                    href={appLink}
                     className="block w-full py-2.5 md:py-3 bg-sabah-blue text-white text-center rounded-xl font-bold text-xs md:text-base hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/30"
                   >
                     Masuk Apps & Tebus
@@ -92,7 +115,7 @@ export default function Home() {
             <Link href="#about" className="hover:text-sabah-blue transition-colors">Tentang</Link>
             <Link href="#books" className="hover:text-sabah-blue transition-colors">Produk</Link>
             <Link
-              href="https://app.dna63.com"
+              href={appLink}
               className="bg-sabah-blue text-white px-6 py-2 rounded-lg font-semibold hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/20"
             >
               Masuk Platform
@@ -212,7 +235,7 @@ export default function Home() {
               className="mt-10 flex flex-col md:flex-row items-center justify-center gap-4"
             >
               <Link
-                href="https://app.dna63.com"
+                href={appLink}
                 className="w-full md:w-auto px-8 py-4 bg-sabah-blue text-white rounded-xl text-lg font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-blue/30"
               >
                 Mulakan Eksplorasi
@@ -272,18 +295,21 @@ export default function Home() {
               desc="Novel pengembaraan masa yang membongkar sejarah perundingan MA63 & Laporan Cobbold melalui Arkib Prof AJ Stockwell."
               image="/images/veto_book.png"
               color="bg-red-900"
+              appLink={appLink}
             />
             <BookCard
               title="KENDADU (2024)"
-              desc="Membongkar perubahan hak Sabah dalam Perlembagaan sejak 1963 dan kesan Ordinan Darurat 1969 berdasarkan hansard rasmi."
+              desc="Membongkar perubahan hak Sabah dalam Perlembagaan sejak 1963 and kesan Ordinan Darurat 1969 berdasarkan hansard rasmi."
               image="/images/kendadu_book.png"
               color="bg-blue-900"
+              appLink={appLink}
             />
             <BookCard
               title="MA63 The Constitution (2023)"
               desc="Susunan semula Perlembagaan dengan indikasi 'Teks Merah' (Annex A) untuk membezakan hak asal Borneo dan perlembagaan semasa."
               image="/images/ma63tc_book.png"
               color="bg-yellow-600"
+              appLink={appLink}
             />
           </div>
         </section>
@@ -330,7 +356,7 @@ export default function Home() {
               </Link>
 
               <Link
-                href="https://app.dna63.com"
+                href={appLink}
                 className="text-sabah-blue font-bold hover:underline flex items-center gap-2"
               >
                 Atau guna Versi Web &rarr;
@@ -353,7 +379,7 @@ export default function Home() {
   )
 }
 
-function BookCard({ title, desc, image, color }) {
+function BookCard({ title, desc, image, color, appLink }) {
   return (
     <motion.div
       whileHover={{ y: -10 }}
@@ -364,7 +390,7 @@ function BookCard({ title, desc, image, color }) {
       </div>
       <h3 className="text-xl font-bold mb-2">{title}</h3>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">{desc}</p>
-      <Link href="https://app.dna63.com" className="mt-auto text-sabah-blue font-bold hover:underline">
+      <Link href={appLink || "https://app.dna63.com"} className="mt-auto text-sabah-blue font-bold hover:underline">
         Baca Sekarang &rarr;
       </Link>
     </motion.div>
