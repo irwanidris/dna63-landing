@@ -311,15 +311,23 @@ export default function Home() {
                 </div>
               </Link>
 
-              <div className="group relative bg-gray-200 dark:bg-gray-800 text-gray-500 px-10 py-5 rounded-2xl font-bold text-xl flex items-center gap-4 border-2 border-dashed border-gray-400 opacity-80 cursor-not-allowed">
-                <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M3,20.5V3.5C3,2.91 3.34,2.39 3.84,2.15L13.69,12L3.84,21.85C3.34,21.61 3,21.09 3,20.5M16.81,15.12L18.66,16.97L4.95,22.25C4.7,22.34 4.45,22.39 4.21,22.39C4.07,22.39 3.93,22.37 3.8,22.33L13.69,12.44L16.81,15.12M14,11.75L17.21,8.96L18.66,7.55L4.95,1.75C4.74,1.67 4.54,1.62 4.35,1.61L13.69,11.44L14,11.75M17.21,12L20.84,15.22C21.21,15.55 21.43,15.89 21.5,16.24L17.55,12.3L17.21,12Z" />
+              <Link
+                href="https://play.google.com/apps/internaltest/4701238914600437095"
+                target="_blank"
+                className="group relative bg-black text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-4 overflow-hidden border border-white/10"
+              >
+                <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                <svg className="w-8 h-8 relative z-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3.6099 20.8801C3.3899 20.6401 3.2699 20.2801 3.2699 19.8201V4.17012C3.2699 3.71012 3.3899 3.35012 3.6099 3.11012L12.0199 11.5301L3.6099 20.8801Z" fill="#00AEEF"/>
+                  <path d="M15.5499 15.0601L12.0199 11.5301L3.6099 3.11012C3.9099 2.80012 4.3899 2.61012 4.9699 2.73012L15.9399 9.02012L15.5499 15.0601Z" fill="#00A651"/>
+                  <path d="M15.5499 15.0601L15.9399 9.02012L19.4699 11.0201C20.3099 11.5001 20.3099 12.5001 19.4699 12.9801L15.5499 15.0601Z" fill="#FFF200"/>
+                  <path d="M15.5499 15.0601L4.9699 21.2701C4.3899 21.3901 3.9099 21.2001 3.6099 20.8901L12.0199 12.4601L15.5499 15.0601Z" fill="#ED1C24"/>
                 </svg>
-                <div className="flex flex-col items-start text-left">
-                  <span className="text-xs opacity-80 uppercase tracking-widest font-normal">Google Play Store</span>
-                  <span>Akan Datang</span>
+                <div className="flex flex-col items-start relative z-10 text-left">
+                  <span className="text-xs text-gray-400 uppercase tracking-widest font-normal">Google Play Store</span>
+                  <span>BETA TESTER</span>
                 </div>
-              </div>
+              </Link>
 
               <Link
                 href="https://app.dna63.com"
