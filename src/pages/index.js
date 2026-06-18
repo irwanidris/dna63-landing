@@ -338,7 +338,7 @@ export default function Home() {
               </Link>
 
               <Link
-                href="https://play.google.com/apps/internaltest/4701238914600437095"
+                href="https://play.google.com/store/apps/details?id=com.dna63.rhinoresources"
                 target="_blank"
                 className="group relative bg-black text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-4 overflow-hidden border border-white/10"
               >
