@@ -323,21 +323,6 @@ export default function Home() {
             </p>
             <div className="flex flex-col md:flex-row items-center justify-center gap-6">
               <Link
-                href="https://drive.google.com/uc?export=download&id=1KIjI0rKRT0aWQPdm7muUcC8Zdt_YiR36"
-                target="_blank"
-                className="group relative bg-sabah-red text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-sabah-blue transition-all shadow-xl shadow-sabah-red/20 flex items-center gap-4 overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                <svg className="w-8 h-8 relative z-10" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
-                </svg>
-                <div className="flex flex-col items-start relative z-10 text-left">
-                  <span className="text-xs opacity-80 uppercase tracking-widest font-normal">Muat Turun APK</span>
-                  <span>Google Drive</span>
-                </div>
-              </Link>
-
-              <Link
                 href="https://play.google.com/store/apps/details?id=com.dna63.rhinoresources"
                 target="_blank"
                 className="group relative bg-black text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-4 overflow-hidden border border-white/10"
