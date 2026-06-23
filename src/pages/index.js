@@ -4,6 +4,8 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { db } from '../lib/firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
 const MotionLink = motion.create(Link)
 
@@ -11,6 +13,30 @@ export default function Home() {
   const [showPopup, setShowPopup] = useState(false);
   const router = useRouter();
   const [referralId, setReferralId] = useState(null);
+  const [betaForm, setBetaForm] = useState({ name: '', email: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState(null);
+
+  const handleBetaSubmit = async (e) => {
+    e.preventDefault();
+    if (!betaForm.name || !betaForm.email) return;
+    setIsSubmitting(true);
+    try {
+      await addDoc(collection(db, "beta_testers"), {
+        name: betaForm.name,
+        email: betaForm.email,
+        timestamp: serverTimestamp(),
+        referralId: referralId || 'direct'
+      });
+      setSubmitStatus("Berjaya! Kami akan hantar jemputan beta ke emel anda.");
+      setBetaForm({ name: '', email: '' });
+    } catch (error) {
+      console.error("Error adding tester:", error);
+      setSubmitStatus("Maaf, ralat berlaku. Sila cuba lagi.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     // Check for referral ID in URL
@@ -321,31 +347,73 @@ export default function Home() {
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
               Dapatkan akses pantas ke platform literasi MA63, koleksi buku digital, dan komuniti aktivis DNA63 terus dari telefon pintar anda. Muat turun aplikasi Android rasmi kami sekarang.
             </p>
-            <div className="flex flex-col md:flex-row items-center justify-center gap-6">
-              <Link
-                href="https://play.google.com/store/apps/details?id=com.dna63.rhinoresources"
-                target="_blank"
-                className="group relative bg-black text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-4 overflow-hidden border border-white/10"
-              >
-                <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                <svg className="w-8 h-8 relative z-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M3.6099 20.8801C3.3899 20.6401 3.2699 20.2801 3.2699 19.8201V4.17012C3.2699 3.71012 3.3899 3.35012 3.6099 3.11012L12.0199 11.5301L3.6099 20.8801Z" fill="#00AEEF"/>
-                  <path d="M15.5499 15.0601L12.0199 11.5301L3.6099 3.11012C3.9099 2.80012 4.3899 2.61012 4.9699 2.73012L15.9399 9.02012L15.5499 15.0601Z" fill="#00A651"/>
-                  <path d="M15.5499 15.0601L15.9399 9.02012L19.4699 11.0201C20.3099 11.5001 20.3099 12.5001 19.4699 12.9801L15.5499 15.0601Z" fill="#FFF200"/>
-                  <path d="M15.5499 15.0601L4.9699 21.2701C4.3899 21.3901 3.9099 21.2001 3.6099 20.8901L12.0199 12.4601L15.5499 15.0601Z" fill="#ED1C24"/>
-                </svg>
-                <div className="flex flex-col items-start relative z-10 text-left">
-                  <span className="text-xs text-gray-400 uppercase tracking-widest font-normal">Google Play Store</span>
-                  <span>BETA TESTER</span>
-                </div>
-              </Link>
+            <div className="flex flex-col items-center justify-center gap-10">
+              <div className="flex flex-col md:flex-row items-center justify-center gap-6">
+                <Link
+                  href="https://play.google.com/store/apps/details?id=com.dna63.rhinoresources"
+                  target="_blank"
+                  className="group relative bg-black text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-4 overflow-hidden border border-white/10"
+                >
+                  <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+                  <svg className="w-8 h-8 relative z-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.6099 20.8801C3.3899 20.6401 3.2699 20.2801 3.2699 19.8201V4.17012C3.2699 3.71012 3.3899 3.35012 3.6099 3.11012L12.0199 11.5301L3.6099 20.8801Z" fill="#00AEEF"/>
+                    <path d="M15.5499 15.0601L12.0199 11.5301L3.6099 3.11012C3.9099 2.80012 4.3899 2.61012 4.9699 2.73012L15.9399 9.02012L15.5499 15.0601Z" fill="#00A651"/>
+                    <path d="M15.5499 15.0601L15.9399 9.02012L19.4699 11.0201C20.3099 11.5001 20.3099 12.5001 19.4699 12.9801L15.5499 15.0601Z" fill="#FFF200"/>
+                    <path d="M15.5499 15.0601L4.9699 21.2701C4.3899 21.3901 3.9099 21.2001 3.6099 20.8901L12.0199 12.4601L15.5499 15.0601Z" fill="#ED1C24"/>
+                  </svg>
+                  <div className="flex flex-col items-start relative z-10 text-left">
+                    <span className="text-xs text-gray-400 uppercase tracking-widest font-normal">Google Play Store</span>
+                    <span>BETA TESTER</span>
+                  </div>
+                </Link>
 
-              <Link
-                href={appLink}
-                className="text-sabah-blue font-bold hover:underline flex items-center gap-2"
-              >
-                Atau guna Versi Web &rarr;
-              </Link>
+                <Link
+                  href={appLink}
+                  className="text-sabah-blue font-bold hover:underline flex items-center gap-2"
+                >
+                  Atau guna Versi Web &rarr;
+                </Link>
+              </div>
+
+              {/* Beta Registration Form */}
+              <div className="w-full max-w-lg bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-2xl border border-sabah-blue/10">
+                <h3 className="text-xl font-bold mb-2 text-sabah-blue">Daftar Sebagai Penguji Beta</h3>
+                <p className="text-sm text-gray-500 mb-6">Dapatkan akses awal ke aplikasi DNA63. Sila isi nama dan alamat emel di bawah.</p>
+                <form onSubmit={handleBetaSubmit} className="space-y-4">
+                  <input
+                    type="text"
+                    placeholder="Nama Penuh"
+                    value={betaForm.name}
+                    onChange={(e) => setBetaForm({...betaForm, name: e.target.value})}
+                    className="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none outline-none focus:ring-2 focus:ring-sabah-blue/50"
+                    required
+                  />
+                  <input
+                    type="email"
+                    placeholder="Alamat Emel"
+                    value={betaForm.email}
+                    onChange={(e) => setBetaForm({...betaForm, email: e.target.value})}
+                    className="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none outline-none focus:ring-2 focus:ring-sabah-blue/50"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full py-4 bg-sabah-blue text-white rounded-xl font-bold hover:bg-sabah-red transition-all disabled:opacity-50 shadow-lg shadow-sabah-blue/20"
+                  >
+                    {isSubmitting ? "Menghantar..." : "Hantar Permohonan Beta"}
+                  </button>
+                </form>
+                {submitStatus && (
+                  <motion.p
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`mt-4 text-sm font-medium ${submitStatus.includes('Berjaya') ? 'text-green-600' : 'text-red-600'}`}
+                  >
+                    {submitStatus}
+                  </motion.p>
+                )}
+              </div>
             </div>
           </div>
         </section>
