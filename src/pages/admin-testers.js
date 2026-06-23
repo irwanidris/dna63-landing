@@ -48,7 +48,7 @@ export default function AdminTesters() {
             <input
               type="password"
               placeholder="Masukkan Kata Laluan Admin"
-              className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-sabah-blue"
+              className="w-full px-5 py-3 rounded-xl border border-gray-200 outline-none focus:ring-2 focus:ring-sabah-blue text-black"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
