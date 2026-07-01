@@ -379,39 +379,47 @@ export default function Home() {
               <div className="w-full max-w-lg bg-white dark:bg-gray-800 p-8 rounded-[2rem] shadow-2xl border border-sabah-blue/10">
                 <h3 className="text-xl font-bold mb-2 text-sabah-blue">Daftar Sebagai Penguji Beta</h3>
                 <p className="text-sm text-gray-500 mb-6">Dapatkan akses awal ke aplikasi DNA63. Sila isi nama dan alamat emel di bawah.</p>
-                <form onSubmit={handleBetaSubmit} className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Nama Penuh"
-                    value={betaForm.name}
-                    onChange={(e) => setBetaForm({...betaForm, name: e.target.value})}
-                    className="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none outline-none focus:ring-2 focus:ring-sabah-blue/50"
-                    required
-                  />
-                  <input
-                    type="email"
-                    placeholder="Alamat Emel"
-                    value={betaForm.email}
-                    onChange={(e) => setBetaForm({...betaForm, email: e.target.value})}
-                    className="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none outline-none focus:ring-2 focus:ring-sabah-blue/50"
-                    required
-                  />
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full py-4 bg-sabah-blue text-white rounded-xl font-bold hover:bg-sabah-red transition-all disabled:opacity-50 shadow-lg shadow-sabah-blue/20"
+                {submitStatus ? (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className={`p-6 rounded-2xl text-center ${submitStatus.includes('Berjaya') ? 'bg-green-100 text-green-800 border border-green-200' : 'bg-red-100 text-red-800 border border-red-200'}`}
                   >
-                    {isSubmitting ? "Menghantar..." : "Hantar Permohonan Beta"}
-                  </button>
-                </form>
-                {submitStatus && (
-                  <motion.p
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`mt-4 text-sm font-medium ${submitStatus.includes('Berjaya') ? 'text-green-600' : 'text-red-600'}`}
-                  >
-                    {submitStatus}
-                  </motion.p>
+                    <div className="text-3xl mb-2">{submitStatus.includes('Berjaya') ? '✅' : '❌'}</div>
+                    <p className="font-bold">{submitStatus}</p>
+                    <button
+                      onClick={() => setSubmitStatus(null)}
+                      className="mt-4 text-xs underline opacity-60 hover:opacity-100"
+                    >
+                      Daftar emel lain
+                    </button>
+                  </motion.div>
+                ) : (
+                  <form onSubmit={handleBetaSubmit} className="space-y-4">
+                    <input
+                      type="text"
+                      placeholder="Nama Penuh"
+                      value={betaForm.name}
+                      onChange={(e) => setBetaForm({...betaForm, name: e.target.value})}
+                      className="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none outline-none focus:ring-2 focus:ring-sabah-blue/50 text-black dark:text-white"
+                      required
+                    />
+                    <input
+                      type="email"
+                      placeholder="Alamat Emel"
+                      value={betaForm.email}
+                      onChange={(e) => setBetaForm({...betaForm, email: e.target.value})}
+                      className="w-full px-5 py-3 rounded-xl bg-gray-50 dark:bg-gray-700 border-none outline-none focus:ring-2 focus:ring-sabah-blue/50 text-black dark:text-white"
+                      required
+                    />
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full py-4 bg-sabah-blue text-white rounded-xl font-bold hover:bg-sabah-red transition-all disabled:opacity-50 shadow-lg shadow-sabah-blue/20"
+                    >
+                      {isSubmitting ? "Sedang Menghantar..." : "Hantar Permohonan Beta"}
+                    </button>
+                  </form>
                 )}
               </div>
             </div>
