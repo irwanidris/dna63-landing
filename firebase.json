@@ -4,7 +4,11 @@
     "source": ".",
     "frameworksBackend": {
       "region": "us-central1"
-    }
+    },
+    "rewrites": [
+      { "source": "/privacy.html", "destination": "/privacy" },
+      { "source": "/delete-account.html", "destination": "/delete-account" }
+    ]
   },
   "apphosting": {
     "backendId": "dna63-landing",
