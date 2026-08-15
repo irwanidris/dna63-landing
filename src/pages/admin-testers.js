@@ -3,6 +3,12 @@ import Head from 'next/head'
 import { db } from '../lib/firebase'
 import { collection, query, orderBy, getDocs } from 'firebase/firestore'
 
+const INTEREST_LABELS = {
+  community: 'Community',
+  runner: 'Runner',
+  vendor: 'Vendor',
+}
+
 export default function AdminTesters() {
   const [password, setPassword] = useState('')
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -86,6 +92,7 @@ export default function AdminTesters() {
                 <tr>
                   <th className="px-6 py-4">Nama</th>
                   <th className="px-6 py-4">Emel</th>
+                  <th className="px-6 py-4">Minat</th>
                   <th className="px-6 py-4">Tarikh Daftar</th>
                   <th className="px-6 py-4">Referral</th>
                 </tr>
@@ -95,6 +102,11 @@ export default function AdminTesters() {
                   <tr key={tester.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4 font-medium">{tester.name}</td>
                     <td className="px-6 py-4">{tester.email}</td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className="px-2 py-1 rounded-md bg-gray-100 text-gray-700 text-xs font-semibold uppercase">
+                        {INTEREST_LABELS[tester.interest] || tester.interest || 'community'}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 text-sm text-gray-500">
                       {tester.timestamp?.toDate().toLocaleDateString('ms-MY')}
                     </td>
