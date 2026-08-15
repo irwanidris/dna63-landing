@@ -11,6 +11,10 @@ const nextConfig = {
         source: '/delete-account.html',
         destination: '/delete-account',
       },
+      {
+        source: '/terms.html',
+        destination: '/terms',
+      },
     ]
   },
 }
