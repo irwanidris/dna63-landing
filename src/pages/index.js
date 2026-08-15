@@ -434,8 +434,13 @@ export default function Home() {
         {/* Runner Section */}
         <section id="runner" className="w-full px-8 py-20 bg-white dark:bg-gray-900 flex flex-col items-center border-t border-gray-100 dark:border-gray-800">
           <div className="max-w-5xl grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="relative aspect-square order-2 md:order-1 bg-gradient-to-br from-sabah-green/20 to-transparent rounded-3xl flex items-center justify-center shadow-2xl border-4 border-sabah-green/10">
-              <span className="text-8xl">🛵</span>
+            <div className="relative aspect-square order-2 md:order-1 rounded-3xl overflow-hidden shadow-2xl border-4 border-sabah-green/10">
+              <Image
+                src="/images/runner_hero.webp"
+                alt="Runner DNA63"
+                fill
+                className="object-cover"
+              />
             </div>
             <div className="order-1 md:order-2">
               <span className="text-sabah-green font-bold text-sm tracking-widest uppercase">Ekonomi Gig Tempatan</span>
@@ -505,8 +510,13 @@ export default function Home() {
                 Daftar Jadi Vendor →
               </Link>
             </div>
-            <div className="relative aspect-square bg-gradient-to-br from-sabah-brown/20 to-transparent rounded-3xl flex items-center justify-center shadow-2xl border-4 border-sabah-brown/10">
-              <span className="text-8xl">☕</span>
+            <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-sabah-brown/10">
+              <Image
+                src="/images/vendor_hero.webp"
+                alt="Vendor DNA63"
+                fill
+                className="object-cover"
+              />
             </div>
           </div>
         </section>
