@@ -425,8 +425,13 @@ export default function Home() {
                 Muat Turun Apps untuk Lapor Aduan →
               </Link>
             </div>
-            <div className="relative aspect-square bg-gradient-to-br from-sabah-blue/20 via-sabah-yellow/10 to-sabah-red/10 rounded-3xl flex items-center justify-center shadow-2xl border-4 border-sabah-blue/10">
-              <span className="text-8xl">🗺️</span>
+            <div className="relative aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-sabah-blue/10">
+              <Image
+                src="/images/aduan_rakyat.webp"
+                alt="Aduan Rakyat DNA63"
+                fill
+                className="object-cover"
+              />
             </div>
           </div>
         </section>
