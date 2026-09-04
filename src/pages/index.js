@@ -178,6 +178,7 @@ export default function Home() {
             <Link href="#runner" className="hover:text-sabah-blue transition-colors">Runner</Link>
             <Link href="#vendor" className="hover:text-sabah-blue transition-colors">Vendor</Link>
             <Link href="#ilmu" className="hover:text-sabah-blue transition-colors">Ilmu</Link>
+            <Link href="/news" className="hover:text-sabah-blue transition-colors">Berita</Link>
             <Link
               href={playStoreLink()}
               target="_blank"
@@ -592,11 +593,16 @@ export default function Home() {
 
         {/* Footer */}
         <footer className="w-full px-8 py-12 border-t border-gray-200 dark:border-gray-800 flex flex-col items-center">
-          <p className="text-gray-500 text-center">© 2026 DNA63 Community. Platform Digital Rakyat Sabah. Semua Hak Terpelihara.</p>
-          <div className="mt-4 flex space-x-6">
-            <Link href="#" className="hover:text-primary">Facebook</Link>
-            <Link href="#" className="hover:text-primary">Telegram</Link>
-            <Link href="#" className="hover:text-primary">WhatsApp</Link>
+          <p className="text-gray-500 text-center mb-4">© 2026 DNA63 Community. Platform Digital Rakyat Sabah. Semua Hak Terpelihara.</p>
+          <div className="flex flex-wrap justify-center gap-x-8 gap-y-2 mb-8 text-sm font-medium">
+            <Link href="/privacy" className="hover:text-sabah-blue transition-colors">Dasar Privasi</Link>
+            <Link href="/terms" className="hover:text-sabah-blue transition-colors">Terma Perkhidmatan</Link>
+            <Link href="/delete-account" className="hover:text-sabah-red transition-colors">Padam Akaun</Link>
+          </div>
+          <div className="flex space-x-6 text-sm">
+            <Link href="#" className="hover:text-sabah-blue">Facebook</Link>
+            <Link href="#" className="hover:text-sabah-blue">Telegram</Link>
+            <Link href="#" className="hover:text-sabah-blue">WhatsApp</Link>
           </div>
         </footer>
       </main>

@@ -1,0 +1,22 @@
+rules_version = '2';
+
+// All newsroom reads/writes from the app go through server-side API routes
+// using the Firebase Admin SDK (which bypasses these rules entirely). These
+// rules are a defense-in-depth backstop for direct client SDK access only:
+// published articles are public-readable; everything else is server-only.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /articles/{articleId} {
+      allow get, list: if resource.data.status == 'published';
+      allow write: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
