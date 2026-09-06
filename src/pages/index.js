@@ -245,16 +245,14 @@ export default function Home() {
               </Link>
 
               <Link
-                href={playStoreLink('runner')}
-                target="_blank"
+                href="/apply?role=runner"
                 className="px-8 py-4 bg-sabah-green text-white rounded-2xl text-lg font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-green/30 flex items-center justify-center gap-2"
               >
                 🛵 Daftar Jadi Runner
               </Link>
 
               <Link
-                href={playStoreLink('vendor')}
-                target="_blank"
+                href="/apply?role=vendor"
                 className="px-8 py-4 bg-sabah-brown text-white rounded-2xl text-lg font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-brown/30 flex items-center justify-center gap-2"
               >
                 ☕ Daftar Jadi Vendor
@@ -392,8 +390,7 @@ export default function Home() {
                 </li>
               </ul>
               <Link
-                href={playStoreLink('runner')}
-                target="_blank"
+                href="/apply?role=runner"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-sabah-green text-white rounded-xl text-lg font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-green/30"
               >
                 Daftar Jadi Runner →
@@ -427,8 +424,7 @@ export default function Home() {
                 </li>
               </ul>
               <Link
-                href={playStoreLink('vendor')}
-                target="_blank"
+                href="/apply?role=vendor"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-sabah-brown text-white rounded-xl text-lg font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-brown/30"
               >
                 Daftar Jadi Vendor →
@@ -565,16 +561,14 @@ export default function Home() {
                 </Link>
 
                 <Link
-                  href={playStoreLink('runner')}
-                  target="_blank"
+                  href="/apply?role=runner"
                   className="px-6 py-4 bg-sabah-green text-white rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-green/20"
                 >
                   🛵 Daftar Runner
                 </Link>
 
                 <Link
-                  href={playStoreLink('vendor')}
-                  target="_blank"
+                  href="/apply?role=vendor"
                   className="px-6 py-4 bg-sabah-brown text-white rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-brown/20"
                 >
                   ☕ Daftar Vendor
