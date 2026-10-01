@@ -1,5 +1,18 @@
 {
   "projects": {
     "default": "dna63-app"
-  }
+  },
+  "targets": {
+    "dna63-app": {
+      "hosting": {
+        "landing-page": [
+          "dna63-landing"
+        ],
+        "app-site": [
+          "dna63-app"
+        ]
+      }
+    }
+  },
+  "etags": {}
 }

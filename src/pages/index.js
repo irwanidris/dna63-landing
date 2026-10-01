@@ -8,7 +8,9 @@ import { useRouter } from 'next/router'
 const MotionLink = motion.create(Link)
 
 const PLAY_STORE_BASE = "https://play.google.com/store/apps/details?id=com.dna63.rhinoresources"
+const APP_STORE_BASE = "https://apps.apple.com/app/dna63-community/id6815618625"
 const playStoreLink = (role) => role ? `${PLAY_STORE_BASE}&referrer=role%3D${role}` : PLAY_STORE_BASE
+const appStoreLink = (role) => role ? `${APP_STORE_BASE}?role=${role}` : APP_STORE_BASE
 
 const FEATURES = [
   {
@@ -104,7 +106,7 @@ export default function Home() {
     <>
       <Head>
         <title>DNA63 Community | Ilmu, Ganjaran & Perkhidmatan Rakyat Sabah</title>
-        <meta name="description" content="Platform digital rakyat Sabah — Akademi MA63, Aduan Rakyat, Runner & Vendor dalam satu apps. Muat turun DNA63 Community di Google Play sekarang." />
+        <meta name="description" content="Platform digital rakyat Sabah — Akademi MA63, Aduan Rakyat, Runner & Vendor dalam satu apps. Muat turun DNA63 Community di Google Play & Apple App Store sekarang." />
         <link rel="icon" href="/images/logo_dna63.png" />
       </Head>
 
@@ -151,13 +153,31 @@ export default function Home() {
                 </p>
                 <div className="mt-auto">
                   <p className="text-[9px] md:text-xs text-sabah-blue font-bold mb-2 md:mb-3 italic">Eksklusif untuk Verified Members di Apps DNA63 sahaja.</p>
-                  <Link
-                    href={playStoreLink()}
-                    target="_blank"
-                    className="block w-full py-2.5 md:py-3 bg-sabah-blue text-white text-center rounded-xl font-bold text-xs md:text-base hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/30"
-                  >
-                    Muat Turun Apps & Tebus
-                  </Link>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <Link
+                      href={appStoreLink()}
+                      target="_blank"
+                      className="flex-1 py-2 md:py-2.5 bg-black text-white text-center rounded-xl font-bold text-xs md:text-sm hover:bg-gray-800 transition-all shadow-md flex items-center justify-center gap-1.5"
+                    >
+                      <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.67-.82 1.13-1.96.99-3.1-.97.04-2.16.65-2.85 1.46-.62.72-1.16 1.88-.99 3.01 1.09.08 2.21-.55 2.85-1.37z"/>
+                      </svg>
+                      <span>App Store</span>
+                    </Link>
+                    <Link
+                      href={playStoreLink()}
+                      target="_blank"
+                      className="flex-1 py-2 md:py-2.5 bg-black text-white text-center rounded-xl font-bold text-xs md:text-sm hover:bg-gray-800 transition-all shadow-md flex items-center justify-center gap-1.5"
+                    >
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3.6099 20.8801C3.3899 20.6401 3.2699 20.2801 3.2699 19.8201V4.17012C3.2699 3.71012 3.3899 3.35012 3.6099 3.11012L12.0199 11.5301L3.6099 20.8801Z" fill="#00AEEF"/>
+                        <path d="M15.5499 15.0601L12.0199 11.5301L3.6099 3.11012C3.9099 2.80012 4.3899 2.61012 4.9699 2.73012L15.9399 9.02012L15.5499 15.0601Z" fill="#00A651"/>
+                        <path d="M15.5499 15.0601L15.9399 9.02012L19.4699 11.0201C20.3099 11.5001 20.3099 12.5001 19.4699 12.9801L15.5499 15.0601Z" fill="#FFF200"/>
+                        <path d="M15.5499 15.0601L4.9699 21.2701C4.3899 21.3901 3.9099 21.2001 3.6099 20.8901L12.0199 12.4601L15.5499 15.0601Z" fill="#ED1C24"/>
+                      </svg>
+                      <span>Google Play</span>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </motion.div>
@@ -180,8 +200,7 @@ export default function Home() {
             <Link href="#ilmu" className="hover:text-sabah-blue transition-colors">Ilmu</Link>
             <Link href="/news" className="hover:text-sabah-blue transition-colors">Berita</Link>
             <Link
-              href={playStoreLink()}
-              target="_blank"
+              href="#download"
               className="bg-sabah-blue text-white px-6 py-2 rounded-lg font-semibold hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/20"
             >
               Muat Turun Apps
@@ -191,7 +210,7 @@ export default function Home() {
 
         {/* Hero Section */}
         <section className="flex flex-col items-center justify-center w-full px-8 py-20 md:py-32 bg-gradient-to-b from-sabah-blue/5 to-white dark:from-dark dark:to-dark">
-          <div className="max-w-4xl text-center">
+          <div className="max-w-5xl text-center">
             <motion.span
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -214,10 +233,10 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="mt-6 text-lg md:text-xl text-gray-600 dark:text-gray-400"
+              className="mt-6 text-lg md:text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto"
             >
               Platform digital rakyat Sabah yang menggabungkan pendidikan sejarah MA63, ekonomi gig tempatan dan
-              penglibatan komuniti — dalam satu genggaman. Belajar, jana pendapatan, dan suarakan isu tempatan anda.
+              penglibatan komuniti — kini tersedia di <strong className="text-dark dark:text-light">App Store</strong> &amp; <strong className="text-dark dark:text-light">Google Play Store</strong>.
             </motion.p>
 
             {/* Primary CTAs */}
@@ -225,12 +244,26 @@ export default function Home() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.3 }}
-              className="mt-10 flex flex-col md:flex-row items-stretch md:items-center justify-center gap-4"
+              className="mt-10 flex flex-col md:flex-row items-stretch md:items-center justify-center gap-4 flex-wrap"
             >
+              <Link
+                href={appStoreLink()}
+                target="_blank"
+                className="group relative bg-black text-white px-7 py-3.5 rounded-2xl font-bold text-base hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 border border-white/10"
+              >
+                <svg className="w-7 h-7 shrink-0 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.67-.82 1.13-1.96.99-3.1-.97.04-2.16.65-2.85 1.46-.62.72-1.16 1.88-.99 3.01 1.09.08 2.21-.55 2.85-1.37z"/>
+                </svg>
+                <div className="flex flex-col items-start text-left">
+                  <span className="text-[10px] text-gray-400 uppercase tracking-widest font-normal">Apple App Store</span>
+                  <span>Muat Turun Apps</span>
+                </div>
+              </Link>
+
               <Link
                 href={playStoreLink()}
                 target="_blank"
-                className="group relative bg-black text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 overflow-hidden border border-white/10"
+                className="group relative bg-black text-white px-7 py-3.5 rounded-2xl font-bold text-base hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center justify-center gap-3 border border-white/10"
               >
                 <svg className="w-7 h-7 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M3.6099 20.8801C3.3899 20.6401 3.2699 20.2801 3.2699 19.8201V4.17012C3.2699 3.71012 3.3899 3.35012 3.6099 3.11012L12.0199 11.5301L3.6099 20.8801Z" fill="#00AEEF"/>
@@ -246,16 +279,16 @@ export default function Home() {
 
               <Link
                 href="/apply?role=runner"
-                className="px-8 py-4 bg-sabah-green text-white rounded-2xl text-lg font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-green/30 flex items-center justify-center gap-2"
+                className="px-7 py-3.5 bg-sabah-green text-white rounded-2xl text-base font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-green/30 flex items-center justify-center gap-2"
               >
-                🛵 Daftar Jadi Runner
+                🛵 Daftar Runner
               </Link>
 
               <Link
                 href="/apply?role=vendor"
-                className="px-8 py-4 bg-sabah-brown text-white rounded-2xl text-lg font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-brown/30 flex items-center justify-center gap-2"
+                className="px-7 py-3.5 bg-sabah-brown text-white rounded-2xl text-base font-bold hover:scale-105 transition-transform shadow-lg shadow-sabah-brown/30 flex items-center justify-center gap-2"
               >
-                ☕ Daftar Jadi Vendor
+                ☕ Daftar Vendor
               </Link>
             </motion.div>
 
@@ -275,8 +308,8 @@ export default function Home() {
         <section className="w-full px-8 py-10 bg-sabah-blue text-white flex flex-col items-center">
           <div className="max-w-5xl w-full grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
             <div>
-              <p className="text-2xl font-bold">Flutter + Firebase</p>
-              <p className="text-white/70 text-sm mt-1">Dibina di atas teknologi masa nyata yang mantap</p>
+              <p className="text-2xl font-bold">App Store & Play Store</p>
+              <p className="text-white/70 text-sm mt-1">Tersedia untuk pengguna iOS & Android</p>
             </div>
             <div>
               <p className="text-2xl font-bold">3 Varian Apps</p>
@@ -335,8 +368,7 @@ export default function Home() {
                 </li>
               </ul>
               <Link
-                href={playStoreLink()}
-                target="_blank"
+                href="#download"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-sabah-blue text-white rounded-xl text-lg font-bold hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/30"
               >
                 Muat Turun Apps untuk Lapor Aduan →
@@ -533,22 +565,35 @@ export default function Home() {
         </section>
 
         {/* Download App Section */}
-        <section className="w-full px-8 py-20 bg-sabah-blue/10 flex flex-col items-center border-t border-sabah-blue/10">
+        <section id="download" className="w-full px-8 py-20 bg-sabah-blue/10 flex flex-col items-center border-t border-sabah-blue/10">
           <div className="max-w-4xl text-center">
             <h2 className="text-3xl md:text-5xl font-bold mb-6 text-sabah-blue">Bawa DNA63 Ke Mana Sahaja</h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 mb-10 leading-relaxed">
               Dapatkan akses pantas ke Akademi MA63, Aduan Rakyat, Runner, Vendor dan komuniti DNA63 terus dari
-              telefon pintar anda. Muat turun aplikasi Android rasmi kami sekarang.
+              telefon pintar anda. Muat turun aplikasi rasmi kami di App Store atau Google Play sekarang.
             </p>
             <div className="flex flex-col items-center justify-center gap-10">
-              <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href={appStoreLink()}
+                  target="_blank"
+                  className="group relative bg-black text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-3 border border-white/10"
+                >
+                  <svg className="w-8 h-8 shrink-0 fill-current" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.85c.67-.82 1.13-1.96.99-3.1-.97.04-2.16.65-2.85 1.46-.62.72-1.16 1.88-.99 3.01 1.09.08 2.21-.55 2.85-1.37z"/>
+                  </svg>
+                  <div className="flex flex-col items-start relative z-10 text-left">
+                    <span className="text-xs text-gray-400 uppercase tracking-widest font-normal">Apple App Store</span>
+                    <span>Muat Turun Apps</span>
+                  </div>
+                </Link>
+
                 <Link
                   href={playStoreLink()}
                   target="_blank"
-                  className="group relative bg-black text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-4 overflow-hidden border border-white/10"
+                  className="group relative bg-black text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-gray-900 transition-all shadow-xl shadow-black/20 flex items-center gap-3 border border-white/10"
                 >
-                  <div className="absolute inset-0 bg-white/5 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
-                  <svg className="w-8 h-8 relative z-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-8 h-8 shrink-0" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3.6099 20.8801C3.3899 20.6401 3.2699 20.2801 3.2699 19.8201V4.17012C3.2699 3.71012 3.3899 3.35012 3.6099 3.11012L12.0199 11.5301L3.6099 20.8801Z" fill="#00AEEF"/>
                     <path d="M15.5499 15.0601L12.0199 11.5301L3.6099 3.11012C3.9099 2.80012 4.3899 2.61012 4.9699 2.73012L15.9399 9.02012L15.5499 15.0601Z" fill="#00A651"/>
                     <path d="M15.5499 15.0601L15.9399 9.02012L19.4699 11.0201C20.3099 11.5001 20.3099 12.5001 19.4699 12.9801L15.5499 15.0601Z" fill="#FFF200"/>
@@ -559,17 +604,19 @@ export default function Home() {
                     <span>Muat Turun Apps</span>
                   </div>
                 </Link>
+              </div>
 
+              <div className="flex flex-wrap items-center justify-center gap-4">
                 <Link
                   href="/apply?role=runner"
-                  className="px-6 py-4 bg-sabah-green text-white rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-green/20"
+                  className="px-6 py-3.5 bg-sabah-green text-white rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-green/20"
                 >
                   🛵 Daftar Runner
                 </Link>
 
                 <Link
                   href="/apply?role=vendor"
-                  className="px-6 py-4 bg-sabah-brown text-white rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-brown/20"
+                  className="px-6 py-3.5 bg-sabah-brown text-white rounded-2xl font-bold hover:opacity-90 transition-all shadow-lg shadow-sabah-brown/20"
                 >
                   ☕ Daftar Vendor
                 </Link>
@@ -615,7 +662,7 @@ function BookCard({ title, desc, image, color }) {
       </div>
       <h3 className="text-xl font-bold mb-2">{title}</h3>
       <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">{desc}</p>
-      <Link href={playStoreLink()} target="_blank" className="mt-auto text-sabah-blue font-bold hover:underline">
+      <Link href="#download" className="mt-auto text-sabah-blue font-bold hover:underline">
         Baca Dalam Apps &rarr;
       </Link>
     </motion.div>

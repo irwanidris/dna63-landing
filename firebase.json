@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "target": "landing-page",
+    "target": "app-site",
     "source": ".",
     "frameworksBackend": {
       "region": "us-central1"
@@ -8,6 +8,14 @@
     "rewrites": [
       { "source": "/privacy.html", "destination": "/privacy" },
       { "source": "/delete-account.html", "destination": "/delete-account" }
+    ],
+    "redirects": [
+      { "source": "/home", "destination": "/", "type": 301 },
+      { "source": "/login", "destination": "/", "type": 301 },
+      { "source": "/author/:path*", "destination": "/", "type": 301 },
+      { "source": "/category/:path*", "destination": "/", "type": 301 },
+      { "source": "/2025/:path*", "destination": "/", "type": 301 },
+      { "source": "/wp-:path*", "destination": "/", "type": 301 }
     ]
   },
   "apphosting": {

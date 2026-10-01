@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin-testers
+
+Sitemap: https://dna63.com/sitemap.xml
