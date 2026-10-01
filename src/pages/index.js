@@ -136,7 +136,7 @@ export default function Home() {
 
               <div className="w-full md:w-1/2 aspect-[4/3] md:aspect-[3/4] relative bg-sabah-blue/10">
                 <Image
-                  src="/images/gs_sundang.png"
+                  src="/images/gs_sundang.webp"
                   alt="GS Sundang Tokoh Sabah"
                   fill
                   className="object-cover"
