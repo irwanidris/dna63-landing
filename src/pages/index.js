@@ -136,23 +136,21 @@ export default function Home() {
 
               <div className="w-full md:w-1/2 aspect-[4/3] md:aspect-[3/4] relative bg-sabah-blue/10">
                 <Image
-                  src="/images/surat_dari_london.png"
-                  alt="Surat Dari London Limited Edition"
+                  src="/images/gs_sundang.png"
+                  alt="GS Sundang Tokoh Sabah"
                   fill
                   className="object-cover"
                 />
               </div>
 
               <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-center overflow-y-auto">
-                <span className="text-sabah-red font-bold text-[10px] md:text-sm tracking-widest uppercase mb-1 md:mb-2">Limited Edition</span>
-                <h2 className="text-lg md:text-2xl font-bold mb-2 md:mb-4 text-sabah-blue">Surat Dari London</h2>
+                <span className="text-sabah-red font-bold text-[10px] md:text-sm tracking-widest uppercase mb-1 md:mb-2">Tokoh Sabah</span>
+                <h2 className="text-lg md:text-2xl font-bold mb-2 md:mb-4 text-sabah-blue">GS SUNDANG</h2>
                 <p className="text-[11px] md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-4 md:mb-6">
-                  Membongkar rahsia surat menyurat antara Kerajaan selepas Singapura berpisah dari Persekutuan yang jelas ada usaha mengubah Perjanjian Malaysia yang ditandatangani pada 9 Julai 1963.
-                  <br /><br className="hidden md:block" />
-                  Surat-surat ini memberi jawapan kenapa perubahan besar dibuat seperti yang didokumentasikan di dalam buku <strong>KENDADU</strong>.
+                  Menulis memorandum berasingan dari Memorandum 20 Perkara. Kerana pendirian beliau, beliau diketepikan dari mewakili North Borneo dalam mesyuarat IGC yang melihat kali pertama muncul berkenaan 40% Hasil Persekutuan akan dimuktamadkan di mesyuarat seterusnya di London pada July 1963.
                 </p>
                 <div className="mt-auto">
-                  <p className="text-[9px] md:text-xs text-sabah-blue font-bold mb-2 md:mb-3 italic">Eksklusif untuk Verified Members di Apps DNA63 sahaja.</p>
+                  <p className="text-[9px] md:text-xs text-sabah-blue font-bold mb-2 md:mb-3 italic">Sertai Komuniti DNA63 untuk mengenali pemimpin terdahulu Sabah.</p>
                   <div className="flex flex-col sm:flex-row gap-2">
                     <Link
                       href={appStoreLink()}
