@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import { authedFetch } from "../lib/useNewsroomUser";
 
 const RichTextEditor = dynamic(() => import("./RichTextEditor"), { ssr: false });
 
-const CATEGORIES = ["Umum", "Komuniti", "Sejarah MA63", "Aduan Rakyat", "Acara", "Runner & Vendor"];
+const FALLBACK_CATEGORY = "Umum";
 
 const EXCERPT_MAX = 300;
 const COVER_MIN_WIDTH = 800;
@@ -71,7 +71,23 @@ function toLocalInputValue(iso) {
 export default function ArticleForm({ initialArticle, articleId }) {
   const router = useRouter();
   const [title, setTitle] = useState(initialArticle?.title || "");
-  const [category, setCategory] = useState(initialArticle?.category || CATEGORIES[0]);
+  const [category, setCategory] = useState(initialArticle?.category || "");
+  const [categories, setCategories] = useState([]);
+
+  // Categories are managed by admins at /newsroom/categories.
+  useEffect(() => {
+    authedFetch("/api/newsroom/categories")
+      .then((res) => res.json())
+      .then((data) => {
+        const names = (data.categories || []).map((c) => c.name);
+        setCategories(names);
+        setCategory((current) => current || names[0] || FALLBACK_CATEGORY);
+      })
+      .catch(() => setCategory((current) => current || FALLBACK_CATEGORY));
+  }, []);
+
+  // Keep an article's existing category selectable even if it was since deleted.
+  const categoryOptions = !category || categories.includes(category) ? categories : [category, ...categories];
   const [excerpt, setExcerpt] = useState(initialArticle?.excerpt || "");
   const [contentHtml, setContentHtml] = useState(initialArticle?.contentHtml || "");
   const [coverImageUrl, setCoverImageUrl] = useState(initialArticle?.coverImageUrl || "");
@@ -166,7 +182,7 @@ export default function ArticleForm({ initialArticle, articleId }) {
             onChange={(e) => setCategory(e.target.value)}
             className="w-full px-6 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 outline-none focus:ring-2 focus:ring-sabah-blue"
           >
-            {CATEGORIES.map((c) => (
+            {categoryOptions.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>

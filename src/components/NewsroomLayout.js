@@ -31,6 +31,9 @@ export default function NewsroomLayout({ children, title }) {
           <Link href="/newsroom" className="hover:text-sabah-blue transition-colors">Artikel Saya</Link>
           <Link href="/newsroom/new" className="hover:text-sabah-blue transition-colors">+ Artikel Baru</Link>
           {user.role === "admin" && (
+            <Link href="/newsroom/categories" className="hover:text-sabah-blue transition-colors">Urus Kategori</Link>
+          )}
+          {user.role === "admin" && (
             <Link href="/newsroom/admin" className="hover:text-sabah-blue transition-colors">Urus Penulis</Link>
           )}
           <span className="hidden sm:inline text-gray-400">{user.name}</span>

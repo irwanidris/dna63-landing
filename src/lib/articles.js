@@ -2,6 +2,7 @@ import DOMPurify from "isomorphic-dompurify";
 import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "./firebaseAdmin";
 import { getCoverImageInfo, checkCoverImage } from "./storageUpload";
+import { cleanCategoryName } from "./categories";
 
 export const ARTICLES_COLLECTION = "articles";
 export const EXCERPT_MAX = 300;
@@ -123,7 +124,7 @@ export async function buildArticleFields(body, user, existing = null) {
     coverImageUrl: coverImageUrl || null,
     coverImageBytes: null,
     coverImageType: null,
-    category: (category && category.trim()) || "Umum",
+    category: cleanCategoryName(category) || "Umum",
     status: publishing ? "published" : "draft",
     authorName: (authorName && authorName.trim().slice(0, 80)) || existing?.authorName || user.name,
     updatedAt: FieldValue.serverTimestamp(),
