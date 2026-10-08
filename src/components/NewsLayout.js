@@ -10,7 +10,7 @@ export default function NewsLayout({ children }) {
           DNA63<span className="text-sabah-red">.</span>
         </Link>
         <div className="flex items-center gap-6">
-          <Link href="/news" className="hover:text-sabah-blue transition-colors">
+          <Link href="/berita" className="hover:text-sabah-blue transition-colors">
             Berita
           </Link>
           <Link href="/" className="hidden sm:inline hover:text-sabah-blue transition-colors">
@@ -30,7 +30,7 @@ export default function NewsLayout({ children }) {
       <footer className="w-full px-8 py-10 border-t border-gray-200 dark:border-gray-800 flex flex-col items-center gap-3 mt-16">
         <p className="text-gray-500 text-sm text-center">© {new Date().getFullYear()} DNA63 Berita. Komuniti Rakyat Sabah.</p>
         <div className="flex items-center gap-4 text-xs text-gray-400">
-          <Link href="/news" className="hover:text-sabah-blue">Berita</Link>
+          <Link href="/berita" className="hover:text-sabah-blue">Berita</Link>
           <span>|</span>
           <a href="/feed.xml" className="hover:text-sabah-blue">RSS</a>
           <span>|</span>

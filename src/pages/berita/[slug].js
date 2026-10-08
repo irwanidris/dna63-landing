@@ -13,7 +13,8 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }) {
   try {
     const article = await getPublishedArticleBySlug(params.slug);
-    if (!article) return { notFound: true };
+    // Short-lived 404: the slug may belong to a draft that is about to be published.
+    if (!article) return { notFound: true, revalidate: 10 };
     return { props: { article }, revalidate: 60 };
   } catch (err) {
     console.error("Failed to load article", params.slug, err);
@@ -36,6 +37,9 @@ export default function ArticlePage({ article }) {
         <meta property="og:description" content={article.excerpt} />
         {article.coverImageUrl && <meta property="og:image" content={article.coverImageUrl} />}
         <meta property="og:type" content="article" />
+        <meta property="og:url" content={`https://dna63.com/berita/${article.slug}`} />
+        <link rel="canonical" href={`https://dna63.com/berita/${article.slug}`} />
+        <meta name="twitter:card" content="summary_large_image" />
       </Head>
 
       <article className="max-w-3xl mx-auto px-4 md:px-8 py-12 md:py-16">

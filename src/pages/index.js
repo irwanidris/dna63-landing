@@ -196,7 +196,7 @@ export default function Home() {
             <Link href="#runner" className="hover:text-sabah-blue transition-colors">Runner</Link>
             <Link href="#vendor" className="hover:text-sabah-blue transition-colors">Vendor</Link>
             <Link href="#ilmu" className="hover:text-sabah-blue transition-colors">Ilmu</Link>
-            <Link href="/news" className="hover:text-sabah-blue transition-colors">Berita</Link>
+            <Link href="/berita" className="hover:text-sabah-blue transition-colors">Berita</Link>
             <Link
               href="#download"
               className="bg-sabah-blue text-white px-6 py-2 rounded-lg font-semibold hover:bg-sabah-red transition-all shadow-lg shadow-sabah-blue/20"

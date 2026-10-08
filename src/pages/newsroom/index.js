@@ -113,7 +113,7 @@ export default function NewsroomDashboard() {
                     <td className="px-6 py-4 text-sm text-gray-400">{formatDate(a.updatedAt)}</td>
                     <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">
                       {a.status === "published" && (
-                        <Link href={`/news/${a.slug}`} target="_blank" className="text-sm text-gray-400 hover:text-sabah-blue font-medium">Lihat</Link>
+                        <Link href={`/berita/${a.slug}`} target="_blank" className="text-sm text-gray-400 hover:text-sabah-blue font-medium">Lihat</Link>
                       )}
                       <Link href={`/newsroom/edit/${a.id}`} className="text-sm text-sabah-blue font-bold hover:underline">Sunting</Link>
                       <button onClick={() => handleDelete(a.id)} className="text-sm text-sabah-red font-bold hover:underline">Padam</button>

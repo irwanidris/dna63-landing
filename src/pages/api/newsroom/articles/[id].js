@@ -3,12 +3,11 @@ import { withNewsroomAuth } from "../../../../lib/newsroomAuth";
 import {
   ARTICLES_COLLECTION,
   slugify,
-  sanitizeHtml,
-  toExcerpt,
   uniqueSlug,
   serializeArticle,
+  buildArticleFields,
+  revalidateArticlePages,
 } from "../../../../lib/articles";
-import { FieldValue } from "firebase-admin/firestore";
 
 async function handler(req, res, user) {
   const { id } = req.query;
@@ -30,41 +29,30 @@ async function handler(req, res, user) {
   }
 
   if (req.method === "PUT") {
-    const { title, contentHtml, category, status, coverImageUrl, excerpt } = req.body || {};
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: "Tajuk diperlukan." });
+    const { error, fields: update } = await buildArticleFields(req.body, user, existing);
+    if (error) {
+      return res.status(400).json({ error });
     }
 
-    const cleanHtml = sanitizeHtml(contentHtml);
-    const finalStatus = status === "published" ? "published" : "draft";
-    const wasPublished = existing.status === "published";
-
-    const update = {
-      title: title.trim(),
-      contentHtml: cleanHtml,
-      excerpt: (excerpt && excerpt.trim()) || toExcerpt(cleanHtml),
-      coverImageUrl: coverImageUrl || null,
-      category: (category && category.trim()) || "Umum",
-      status: finalStatus,
-      updatedAt: FieldValue.serverTimestamp(),
-    };
-
-    // Re-slug only if the title actually changed, to keep published URLs stable.
-    if (title.trim() !== existing.title) {
-      update.slug = await uniqueSlug(slugify(title), id);
-    }
-
-    if (finalStatus === "published" && !wasPublished) {
-      update.publishedAt = FieldValue.serverTimestamp();
+    // The slug is the article's permanent URL (and its RSS guid): it follows
+    // the title only until the article is first published, then never changes.
+    if (!existing.publishedAt && update.title !== existing.title) {
+      update.slug = await uniqueSlug(slugify(update.title), id);
     }
 
     await ref.update(update);
     const saved = await ref.get();
+    if (existing.status === "published" || update.status === "published") {
+      await revalidateArticlePages(res, saved.data().slug);
+    }
     return res.status(200).json({ article: serializeArticle(saved) });
   }
 
   if (req.method === "DELETE") {
     await ref.delete();
+    if (existing.status === "published") {
+      await revalidateArticlePages(res, existing.slug);
+    }
     return res.status(200).json({ ok: true });
   }
 

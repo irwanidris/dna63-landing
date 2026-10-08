@@ -1,12 +1,12 @@
 import { adminDb } from "../../../../lib/firebaseAdmin";
-import { withNewsroomAuth, normalizeEmail } from "../../../../lib/newsroomAuth";
+import { withNewsroomAuth, normalizeEmail, NEWSROOM_USERS_COLLECTION } from "../../../../lib/newsroomAuth";
 import { FieldValue } from "firebase-admin/firestore";
 
 async function handler(req, res, user) {
   if (req.method === "GET") {
     const [invitesSnap, usersSnap] = await Promise.all([
       adminDb.collection("newsroomInvites").get(),
-      adminDb.collection("users").get(),
+      adminDb.collection(NEWSROOM_USERS_COLLECTION).get(),
     ]);
 
     const usersByUid = new Map(usersSnap.docs.map((d) => [d.id, { uid: d.id, ...d.data() }]));
@@ -40,7 +40,10 @@ async function handler(req, res, user) {
       // Already an active/known account — just update their role, don't
       // reset their invite status back to "pending".
       await inviteRef.update({ role: finalRole });
-      await adminDb.collection("users").doc(existing.data().claimedUid).update({ role: finalRole });
+      await adminDb
+        .collection(NEWSROOM_USERS_COLLECTION)
+        .doc(existing.data().claimedUid)
+        .set({ role: finalRole }, { merge: true });
     } else {
       await inviteRef.set({
         role: finalRole,

@@ -1,5 +1,5 @@
-import { adminAuth, adminDb } from "../../../../lib/firebaseAdmin";
-import { withNewsroomAuth, normalizeEmail } from "../../../../lib/newsroomAuth";
+import { adminDb } from "../../../../lib/firebaseAdmin";
+import { withNewsroomAuth, normalizeEmail, NEWSROOM_USERS_COLLECTION } from "../../../../lib/newsroomAuth";
 
 async function handler(req, res, user) {
   const email = normalizeEmail(req.query.email);
@@ -22,15 +22,15 @@ async function handler(req, res, user) {
     if (!invite.claimedUid) {
       return res.status(400).json({ error: "Jemputan belum dituntut — belum ada akaun untuk dinyahaktifkan." });
     }
-    await adminAuth.updateUser(invite.claimedUid, { disabled }).catch(() => {});
-    await adminDb.collection("users").doc(invite.claimedUid).update({ disabled });
+    // Only the newsroom profile is touched: the Firebase Auth account and
+    // users/{uid} belong to the person's DNA63 mobile app account.
+    await adminDb.collection(NEWSROOM_USERS_COLLECTION).doc(invite.claimedUid).set({ disabled }, { merge: true });
     return res.status(200).json({ ok: true });
   }
 
   if (req.method === "DELETE") {
     if (invite.claimedUid) {
-      await adminAuth.deleteUser(invite.claimedUid).catch(() => {});
-      await adminDb.collection("users").doc(invite.claimedUid).delete();
+      await adminDb.collection(NEWSROOM_USERS_COLLECTION).doc(invite.claimedUid).delete();
     }
     await inviteRef.delete();
     return res.status(200).json({ ok: true });

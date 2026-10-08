@@ -1,7 +1,10 @@
 import DOMPurify from "isomorphic-dompurify";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "./firebaseAdmin";
+import { getCoverImageInfo, checkCoverImage } from "./storageUpload";
 
 export const ARTICLES_COLLECTION = "articles";
+export const EXCERPT_MAX = 300;
 
 export function slugify(title) {
   return title
@@ -26,9 +29,17 @@ export function sanitizeHtml(html) {
   });
 }
 
-export function toExcerpt(html, maxLen = 200) {
-  const text = (html || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-  return text.length > maxLen ? text.slice(0, maxLen).trim() + "…" : text;
+const ENTITIES = { "&nbsp;": " ", "&amp;": "&", "&lt;": "<", "&gt;": ">", "&quot;": '"', "&#39;": "'" };
+
+/** Plain-text summary (no HTML), capped at maxLen characters including the ellipsis. */
+export function toExcerpt(html, maxLen = EXCERPT_MAX) {
+  const text = (html || "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/&(nbsp|amp|lt|gt|quot|#39);/g, (m) => ENTITIES[m])
+    .replace(/\s+/g, " ")
+    .trim();
+  const chars = Array.from(text);
+  return chars.length > maxLen ? chars.slice(0, maxLen - 1).join("").trim() + "…" : text;
 }
 
 /** Ensures a slug is unique among articles, appending -2, -3, ... if needed. */
@@ -59,6 +70,8 @@ function serializeArticle(doc) {
     excerpt: data.excerpt || "",
     contentHtml: data.contentHtml || "",
     coverImageUrl: data.coverImageUrl || null,
+    coverImageBytes: data.coverImageBytes || null,
+    coverImageType: data.coverImageType || null,
     category: data.category || "Umum",
     status: data.status || "draft",
     authorId: data.authorId || null,
@@ -88,6 +101,85 @@ export async function getPublishedArticleBySlug(slug) {
     .get();
   if (snap.empty) return null;
   return serializeArticle(snap.docs[0]);
+}
+
+/**
+ * Validates an article create/update request body and returns the Firestore
+ * fields shared by both. `existing` is the current document data on update.
+ * Returns { error } (a message for the author) or { fields }.
+ */
+export async function buildArticleFields(body, user, existing = null) {
+  const { title, contentHtml, category, status, coverImageUrl, excerpt, authorName, publishedAt } = body || {};
+  if (!title || !title.trim()) {
+    return { error: "Tajuk diperlukan." };
+  }
+
+  const publishing = status === "published";
+  const cleanHtml = sanitizeHtml(contentHtml);
+  const fields = {
+    title: title.trim(),
+    contentHtml: cleanHtml,
+    excerpt: toExcerpt(excerpt) || toExcerpt(cleanHtml),
+    coverImageUrl: coverImageUrl || null,
+    coverImageBytes: null,
+    coverImageType: null,
+    category: (category && category.trim()) || "Umum",
+    status: publishing ? "published" : "draft",
+    authorName: (authorName && authorName.trim().slice(0, 80)) || existing?.authorName || user.name,
+    updatedAt: FieldValue.serverTimestamp(),
+  };
+
+  // The cover image is mandatory once an article is public: the RSS feed's
+  // <enclosure> and the page's og:image both depend on it.
+  if (publishing && !coverImageUrl) {
+    return { error: "Gambar utama diperlukan sebelum artikel boleh diterbitkan." };
+  }
+  if (coverImageUrl) {
+    let info = null;
+    try {
+      info = await getCoverImageInfo(coverImageUrl);
+    } catch (err) {
+      if (publishing) return { error: err.message };
+    }
+    if (info) {
+      const problem = publishing ? checkCoverImage(info) : null;
+      if (problem) return { error: problem };
+      fields.coverImageBytes = info.bytes;
+      fields.coverImageType = info.type;
+    }
+  }
+
+  if (publishing) {
+    if (publishedAt) {
+      const date = new Date(publishedAt);
+      if (Number.isNaN(date.getTime())) {
+        return { error: "Tarikh terbit tidak sah." };
+      }
+      if (date.getTime() > Date.now() + 5 * 60 * 1000) {
+        return { error: "Tarikh terbit tidak boleh di masa hadapan." };
+      }
+      fields.publishedAt = Timestamp.fromDate(date);
+    } else if (!existing?.publishedAt) {
+      fields.publishedAt = FieldValue.serverTimestamp();
+    }
+  }
+
+  return { fields };
+}
+
+/**
+ * Best-effort refresh of the public pages after a newsroom write, so a
+ * publish/unpublish shows up at once instead of after the ISR window.
+ */
+export async function revalidateArticlePages(res, slug) {
+  for (const path of ["/berita", slug && `/berita/${slug}`]) {
+    if (!path) continue;
+    try {
+      await res.revalidate(path);
+    } catch (err) {
+      console.warn("Revalidate failed for", path, err.message);
+    }
+  }
 }
 
 export { serializeArticle };

@@ -43,7 +43,7 @@ export default function NewsIndex({ articles }) {
         )}
 
         {featured && (
-          <Link href={`/news/${featured.slug}`} className="group block mb-12">
+          <Link href={`/berita/${featured.slug}`} className="group block mb-12">
             <div className="rounded-[2rem] overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 shadow-xl grid md:grid-cols-2">
               <div className="relative aspect-video md:aspect-auto bg-gray-100 dark:bg-gray-800">
                 {featured.coverImageUrl && (
@@ -76,7 +76,7 @@ export default function NewsIndex({ articles }) {
           {rest.map((article) => (
             <Link
               key={article.id}
-              href={`/news/${article.slug}`}
+              href={`/berita/${article.slug}`}
               className="group block bg-white dark:bg-gray-900 rounded-[1.5rem] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-shadow"
             >
               <div className="relative aspect-video bg-gray-100 dark:bg-gray-800">

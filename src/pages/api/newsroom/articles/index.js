@@ -3,10 +3,10 @@ import { withNewsroomAuth } from "../../../../lib/newsroomAuth";
 import {
   ARTICLES_COLLECTION,
   slugify,
-  sanitizeHtml,
-  toExcerpt,
   uniqueSlug,
   serializeArticle,
+  buildArticleFields,
+  revalidateArticlePages,
 } from "../../../../lib/articles";
 import { FieldValue } from "firebase-admin/firestore";
 
@@ -27,33 +27,25 @@ async function handler(req, res, user) {
   }
 
   if (req.method === "POST") {
-    const { title, contentHtml, category, status, coverImageUrl, excerpt } = req.body || {};
-    if (!title || !title.trim()) {
-      return res.status(400).json({ error: "Tajuk diperlukan." });
+    const { error, fields } = await buildArticleFields(req.body, user);
+    if (error) {
+      return res.status(400).json({ error });
     }
 
-    const cleanHtml = sanitizeHtml(contentHtml);
-    const baseSlug = slugify(title);
-    const slug = await uniqueSlug(baseSlug);
-    const finalStatus = status === "published" ? "published" : "draft";
-    const now = FieldValue.serverTimestamp();
+    const slug = await uniqueSlug(slugify(fields.title));
 
     const docRef = await adminDb.collection(ARTICLES_COLLECTION).add({
-      title: title.trim(),
+      publishedAt: null,
+      ...fields,
       slug,
-      contentHtml: cleanHtml,
-      excerpt: (excerpt && excerpt.trim()) || toExcerpt(cleanHtml),
-      coverImageUrl: coverImageUrl || null,
-      category: (category && category.trim()) || "Umum",
-      status: finalStatus,
       authorId: user.uid,
-      authorName: user.name,
-      createdAt: now,
-      updatedAt: now,
-      publishedAt: finalStatus === "published" ? now : null,
+      createdAt: FieldValue.serverTimestamp(),
     });
 
     const saved = await docRef.get();
+    if (fields.status === "published") {
+      await revalidateArticlePages(res, slug);
+    }
     return res.status(201).json({ article: serializeArticle(saved) });
   }
 
