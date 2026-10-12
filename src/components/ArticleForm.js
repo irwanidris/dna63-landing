@@ -129,6 +129,8 @@ export default function ArticleForm({ initialArticle, articleId }) {
     }
   };
 
+  const scheduling = !!publishedAt && new Date(publishedAt).getTime() > Date.now();
+
   const save = async (status) => {
     setError("");
     if (!title.trim()) {
@@ -221,7 +223,11 @@ export default function ArticleForm({ initialArticle, articleId }) {
               onChange={(e) => setPublishedAt(e.target.value)}
               className="w-full px-6 py-4 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 outline-none focus:ring-2 focus:ring-sabah-blue"
             />
-            <p className="text-xs text-gray-400 mt-2">Kosongkan untuk guna masa artikel diterbitkan.</p>
+            <p className="text-xs text-gray-400 mt-2">
+              {scheduling
+                ? "Artikel akan diterbitkan secara automatik pada masa ini."
+                : "Kosongkan untuk guna masa artikel diterbitkan. Pilih masa hadapan untuk menjadualkan."}
+            </p>
           </div>
         </div>
 
@@ -258,7 +264,7 @@ export default function ArticleForm({ initialArticle, articleId }) {
           onClick={() => save("published")}
           className="px-6 py-3 bg-sabah-blue text-white rounded-2xl font-bold shadow-lg shadow-sabah-blue/20 hover:bg-sabah-red transition-colors disabled:opacity-60"
         >
-          {initialArticle?.status === "published" ? "Kemaskini Artikel" : "Terbitkan"}
+          {scheduling ? "Jadualkan" : initialArticle?.status === "published" ? "Kemaskini Artikel" : "Terbitkan"}
         </button>
       </div>
     </div>

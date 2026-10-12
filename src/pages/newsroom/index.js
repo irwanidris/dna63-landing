@@ -8,16 +8,30 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString("ms-MY", { day: "2-digit", month: "short", year: "numeric" });
 }
 
-function StatusBadge({ status }) {
-  const isPublished = status === "published";
+function formatDateTime(iso) {
+  if (!iso) return "";
+  return new Date(iso).toLocaleString("ms-MY", {
+    day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
+  });
+}
+
+const STATUS_STYLES = {
+  published: ["Diterbitkan", "bg-sabah-green/10 text-sabah-green"],
+  scheduled: ["Dijadualkan", "bg-sabah-yellow/20 text-yellow-700 dark:text-sabah-yellow"],
+  draft: ["Draf", "bg-gray-200 dark:bg-gray-700 text-gray-500"],
+};
+
+function StatusBadge({ status, publishedAt }) {
+  const [label, className] = STATUS_STYLES[status] || STATUS_STYLES.draft;
   return (
-    <span
-      className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
-        isPublished ? "bg-sabah-green/10 text-sabah-green" : "bg-gray-200 dark:bg-gray-700 text-gray-500"
-      }`}
-    >
-      {isPublished ? "Diterbitkan" : "Draf"}
-    </span>
+    <>
+      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${className}`}>
+        {label}
+      </span>
+      {status === "scheduled" && (
+        <p className="text-xs text-gray-400 mt-2 whitespace-nowrap">{formatDateTime(publishedAt)}</p>
+      )}
+    </>
   );
 }
 
@@ -71,6 +85,7 @@ export default function NewsroomDashboard() {
         {[
           ["all", "Semua"],
           ["draft", "Draf"],
+          ["scheduled", "Dijadualkan"],
           ["published", "Diterbitkan"],
         ].map(([key, label]) => (
           <button
@@ -108,7 +123,7 @@ export default function NewsroomDashboard() {
                 {filtered.map((a) => (
                   <tr key={a.id} className="hover:bg-sabah-blue/[0.02] dark:hover:bg-sabah-blue/[0.05] transition-colors">
                     <td className="px-6 py-4 font-bold max-w-xs truncate">{a.title}</td>
-                    <td className="px-6 py-4"><StatusBadge status={a.status} /></td>
+                    <td className="px-6 py-4"><StatusBadge status={a.status} publishedAt={a.publishedAt} /></td>
                     {user?.role === "admin" && <td className="px-6 py-4 text-sm text-gray-500">{a.authorName}</td>}
                     <td className="px-6 py-4 text-sm text-gray-400">{formatDate(a.updatedAt)}</td>
                     <td className="px-6 py-4 text-right space-x-4 whitespace-nowrap">

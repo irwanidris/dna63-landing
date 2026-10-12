@@ -62,6 +62,11 @@ export async function uniqueSlug(baseSlug, excludeId = null) {
   return `${baseSlug}-${Date.now()}`;
 }
 
+/** True once a scheduled article's publish time has arrived. */
+function isDue(data) {
+  return data.status === "scheduled" && !!data.publishedAt && data.publishedAt.toMillis() <= Date.now();
+}
+
 function serializeArticle(doc) {
   const data = doc.data();
   return {
@@ -74,7 +79,7 @@ function serializeArticle(doc) {
     coverImageBytes: data.coverImageBytes || null,
     coverImageType: data.coverImageType || null,
     category: data.category || "Umum",
-    status: data.status || "draft",
+    status: isDue(data) ? "published" : data.status || "draft",
     authorId: data.authorId || null,
     authorName: data.authorName || "DNA63",
     createdAt: data.createdAt ? data.createdAt.toDate().toISOString() : null,
@@ -83,13 +88,33 @@ function serializeArticle(doc) {
   };
 }
 
+/**
+ * Best-effort: stores "published" on scheduled articles whose time has come,
+ * so the status in Firestore catches up with what readers already see.
+ */
+async function promoteDue(docs) {
+  const due = docs.filter((d) => isDue(d.data()));
+  if (due.length === 0) return;
+  try {
+    const batch = adminDb.batch();
+    due.forEach((d) => batch.update(d.ref, { status: "published" }));
+    await batch.commit();
+  } catch (err) {
+    console.warn("Failed to promote scheduled articles", err.message);
+  }
+}
+
+// Scheduled articles go live by themselves: public reads include them as
+// soon as their publishedAt has passed, with no background job involved.
 export async function listPublishedArticles({ limit = 50 } = {}) {
   const snap = await adminDb
     .collection(ARTICLES_COLLECTION)
-    .where("status", "==", "published")
+    .where("status", "in", ["published", "scheduled"])
+    .where("publishedAt", "<=", Timestamp.now())
     .orderBy("publishedAt", "desc")
     .limit(limit)
     .get();
+  await promoteDue(snap.docs);
   return snap.docs.map(serializeArticle);
 }
 
@@ -97,11 +122,14 @@ export async function getPublishedArticleBySlug(slug) {
   const snap = await adminDb
     .collection(ARTICLES_COLLECTION)
     .where("slug", "==", slug)
-    .where("status", "==", "published")
     .limit(1)
     .get();
   if (snap.empty) return null;
-  return serializeArticle(snap.docs[0]);
+  const doc = snap.docs[0];
+  const data = doc.data();
+  if (data.status !== "published" && !isDue(data)) return null;
+  await promoteDue([doc]);
+  return serializeArticle(doc);
 }
 
 /**
@@ -151,17 +179,20 @@ export async function buildArticleFields(body, user, existing = null) {
   }
 
   if (publishing) {
+    let goLive = existing?.publishedAt ? existing.publishedAt.toDate() : null;
     if (publishedAt) {
       const date = new Date(publishedAt);
       if (Number.isNaN(date.getTime())) {
         return { error: "Tarikh terbit tidak sah." };
       }
-      if (date.getTime() > Date.now() + 5 * 60 * 1000) {
-        return { error: "Tarikh terbit tidak boleh di masa hadapan." };
-      }
       fields.publishedAt = Timestamp.fromDate(date);
+      goLive = date;
     } else if (!existing?.publishedAt) {
       fields.publishedAt = FieldValue.serverTimestamp();
+    }
+    // A publish date in the future schedules the article instead.
+    if (goLive && goLive.getTime() > Date.now()) {
+      fields.status = "scheduled";
     }
   }
 

@@ -35,8 +35,9 @@ async function handler(req, res, user) {
     }
 
     // The slug is the article's permanent URL (and its RSS guid): it follows
-    // the title only until the article is first published, then never changes.
-    if (!existing.publishedAt && update.title !== existing.title) {
+    // the title only until the article first goes live, then never changes.
+    const wasLive = existing.publishedAt && existing.publishedAt.toMillis() <= Date.now();
+    if (!wasLive && update.title !== existing.title) {
       update.slug = await uniqueSlug(slugify(update.title), id);
     }
 
