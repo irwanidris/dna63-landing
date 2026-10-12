@@ -3,22 +3,23 @@ import Image from "next/image";
 import NewsLayout from "../../components/NewsLayout";
 import { getPublishedArticleBySlug } from "../../lib/articles";
 
-export async function getStaticPaths() {
-  // No paths are pre-rendered at build time (Firebase App Hosting's build
-  // step may not share the runtime service account's Firestore access).
-  // Every article is instead rendered on first request and cached by ISR.
-  return { paths: [], fallback: "blocking" };
-}
-
-export async function getStaticProps({ params }) {
+// Rendered per request (CDN-cached for a minute) rather than with ISR: on
+// Firebase Hosting the regenerated ISR page is never persisted, so edits and
+// unpublishes would not reach readers.
+export async function getServerSideProps({ params, res }) {
   try {
     const article = await getPublishedArticleBySlug(params.slug);
-    // Short-lived 404: the slug may belong to a draft that is about to be published.
-    if (!article) return { notFound: true, revalidate: 10 };
-    return { props: { article }, revalidate: 60 };
+    // Uncached 404: the slug may belong to a draft that is about to be published.
+    if (!article) {
+      res.setHeader("Cache-Control", "no-store");
+      return { notFound: true };
+    }
+    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60");
+    return { props: { article } };
   } catch (err) {
     console.error("Failed to load article", params.slug, err);
-    return { notFound: true, revalidate: 10 };
+    res.setHeader("Cache-Control", "no-store");
+    return { notFound: true };
   }
 }
 

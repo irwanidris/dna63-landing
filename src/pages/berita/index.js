@@ -4,13 +4,18 @@ import Image from "next/image";
 import NewsLayout from "../../components/NewsLayout";
 import { listPublishedArticles } from "../../lib/articles";
 
-export async function getStaticProps() {
+// Rendered per request (CDN-cached for a minute) rather than with ISR: on
+// Firebase Hosting the regenerated ISR page is never persisted, so the list
+// stayed frozen at its build-time snapshot.
+export async function getServerSideProps({ res }) {
   try {
     const articles = await listPublishedArticles({ limit: 60 });
-    return { props: { articles }, revalidate: 60 };
+    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60");
+    return { props: { articles } };
   } catch (err) {
     console.error("Failed to load published articles", err);
-    return { props: { articles: [] }, revalidate: 10 };
+    res.setHeader("Cache-Control", "no-store");
+    return { props: { articles: [] } };
   }
 }
 
