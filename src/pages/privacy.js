@@ -45,7 +45,7 @@ export default function PrivacyPolicy() {
               <header className="mb-12 border-b border-gray-100 dark:border-gray-800 pb-8">
                 <p className="text-sabah-blue font-bold text-xs tracking-widest uppercase mb-2">Privasi Data</p>
                 <h1 className="text-3xl md:text-5xl font-bold mb-6">Dasar Privasi</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Terakhir dikemaskini: <span className="text-dark dark:text-gray-200 font-bold">17 Ogos 2026</span></p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Terakhir dikemaskini: <span className="text-dark dark:text-gray-200 font-bold">12 Oktober 2026</span></p>
               </header>
 
               <div className="text-gray-700 dark:text-gray-300 leading-relaxed space-y-10">
@@ -80,6 +80,12 @@ export default function PrivacyPolicy() {
                 <section>
                   <h2 className="text-xl md:text-2xl font-bold text-sabah-blue mb-4">3. Keselamatan Data</h2>
                   <p>Keselamatan data anda adalah keutamaan kami. Kami menggunakan infrastruktur <strong>Google Firebase</strong> yang mematuhi piawaian keselamatan antarabangsa untuk menyimpan dan memproses data anda dengan enkripsi penuh.</p>
+                </section>
+
+                <section>
+                  <h2 className="text-xl md:text-2xl font-bold text-sabah-blue mb-4">4. Iklan dan Kuki</h2>
+                  <p>Laman web dna63.com memaparkan iklan melalui <strong>Google AdSense</strong>. Vendor pihak ketiga, termasuk Google, menggunakan kuki untuk menyiarkan iklan berdasarkan lawatan anda yang terdahulu ke laman web ini atau laman web lain. Penggunaan kuki pengiklanan membolehkan Google dan rakan kongsinya menyiarkan iklan kepada anda berdasarkan lawatan anda ke laman ini dan/atau laman lain di Internet.</p>
+                  <p className="mt-4">Anda boleh menarik diri daripada pengiklanan yang diperibadikan dengan melawati <a href="https://adssettings.google.com" target="_blank" rel="noopener noreferrer" className="text-sabah-blue underline">Tetapan Iklan Google</a>, atau menarik diri daripada kuki vendor pihak ketiga yang lain di <a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" className="text-sabah-blue underline">aboutads.info</a>. Untuk mengetahui cara Google menggunakan maklumat daripada laman yang menggunakan perkhidmatannya, lihat <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener noreferrer" className="text-sabah-blue underline">Cara Google menggunakan maklumat daripada laman rakan kongsi</a>.</p>
                 </section>
 
                 <section className="bg-sabah-blue/5 dark:bg-sabah-blue/10 p-8 rounded-3xl border border-sabah-blue/10 mt-12">
