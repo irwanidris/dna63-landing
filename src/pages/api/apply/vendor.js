@@ -160,9 +160,14 @@ export default async function handler(req, res) {
     phone: decoded.phone_number,
   });
 
-  const shopPhotoUrl = await saveBase64Image(photos.shopPhoto, `vendor_docs/${uid}_shop`);
-  const ssmPhotoUrl = photos.ssmPhoto ? await saveBase64Image(photos.ssmPhoto, `vendor_docs/${uid}_ssm`) : "";
-  const resitPhotoUrl = await saveBase64Image(photos.resitPhoto, `vendor_docs/${uid}_resit`);
+  // A random name per upload: a fixed one (as the mobile app's
+  // vendor_setup_page.dart uses) would let a new application overwrite the
+  // shop photo an approved vendor is already showing, and these public
+  // files would be guessable from the uid. The app only reads the stored URL.
+  const docPath = (kind) => `vendor_docs/${uid}_${kind}_${crypto.randomUUID()}`;
+  const shopPhotoUrl = await saveBase64Image(photos.shopPhoto, docPath("shop"));
+  const ssmPhotoUrl = photos.ssmPhoto ? await saveBase64Image(photos.ssmPhoto, docPath("ssm")) : "";
+  const resitPhotoUrl = await saveBase64Image(photos.resitPhoto, docPath("resit"));
 
   // Padan verified_form_page.dart:_uploadToStorage (folder mykads/passports ikut idType).
   const idFolder = body.idType === "passport" ? "passports" : "mykads";
