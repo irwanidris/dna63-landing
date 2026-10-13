@@ -1,7 +1,10 @@
 import Head from "next/head";
 import Image from "next/image";
 import NewsLayout from "../../components/NewsLayout";
+import dynamic from "next/dynamic";
 import { getPublishedArticleBySlug } from "../../lib/articles";
+
+const ArticleEditLink = dynamic(() => import("../../components/ArticleEditLink"), { ssr: false });
 
 // Rendered per request (CDN-cached for a minute) rather than with ISR: on
 // Firebase Hosting the regenerated ISR page is never persisted, so edits and
@@ -46,9 +49,12 @@ export default function ArticlePage({ article }) {
       <article className="max-w-3xl mx-auto px-4 md:px-8 py-12 md:py-16">
         <span className="text-xs font-black uppercase tracking-widest text-sabah-blue">{article.category}</span>
         <h1 className="text-3xl md:text-5xl font-bold mt-3 mb-4">{article.title}</h1>
-        <p className="text-sm text-gray-400 mb-8">
-          {article.authorName} &middot; {formatDate(article.publishedAt)}
-        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-8">
+          <p className="text-sm text-gray-400">
+            {article.authorName} &middot; {formatDate(article.publishedAt)}
+          </p>
+          <ArticleEditLink articleId={article.id} authorId={article.authorId} />
+        </div>
 
         {article.coverImageUrl && (
           <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-10 bg-gray-100 dark:bg-gray-800">
