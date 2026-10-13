@@ -78,6 +78,39 @@ export function checkCoverImage({ bytes, type, width }) {
  * Image.network(url) consumes (same pattern as api/newsroom/upload.js).
  */
 export async function saveBase64Image(dataUrl, path, { maxBytes = 8 * 1024 * 1024 } = {}) {
+  const { buffer, mimeType, ext } = decodeImageDataUrl(dataUrl, { maxBytes });
+
+  const filename = `${path}.${ext}`;
+  const file = adminStorage.bucket().file(filename);
+  await file.save(buffer, {
+    metadata: { contentType: mimeType, cacheControl: "public, max-age=31536000, immutable" },
+  });
+  await file.makePublic();
+
+  return `https://storage.googleapis.com/${adminStorage.bucket().name}/${filename}`;
+}
+
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** True if the bytes really start like the declared image type. */
+function matchesImageType(buffer, mimeType) {
+  if (mimeType === "image/jpeg") {
+    return buffer.length > 3 && buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
+  }
+  if (mimeType === "image/png") {
+    return buffer.length > 8 && buffer.subarray(0, 8).equals(PNG_SIGNATURE);
+  }
+  if (mimeType === "image/webp") {
+    return buffer.length > 12 && buffer.toString("latin1", 0, 4) === "RIFF" && buffer.toString("latin1", 8, 12) === "WEBP";
+  }
+  return false;
+}
+
+/**
+ * Decodes a base64 image data URL and checks its declared type, size and
+ * file signature. Throws an Error with a message for the applicant.
+ */
+export function decodeImageDataUrl(dataUrl, { maxBytes = 8 * 1024 * 1024 } = {}) {
   const match = typeof dataUrl === "string" && dataUrl.match(/^data:(image\/[a-z]+);base64,(.+)$/);
   if (!match) {
     throw new Error("Imej tidak sah.");
@@ -93,13 +126,9 @@ export async function saveBase64Image(dataUrl, path, { maxBytes = 8 * 1024 * 102
   if (buffer.length > maxBytes) {
     throw new Error(`Saiz imej mesti bawah ${Math.floor(maxBytes / (1024 * 1024))}MB.`);
   }
+  if (!matchesImageType(buffer, mimeType)) {
+    throw new Error("Fail ini bukan imej yang sah.");
+  }
 
-  const filename = `${path}.${ext}`;
-  const file = adminStorage.bucket().file(filename);
-  await file.save(buffer, {
-    metadata: { contentType: mimeType, cacheControl: "public, max-age=31536000, immutable" },
-  });
-  await file.makePublic();
-
-  return `https://storage.googleapis.com/${adminStorage.bucket().name}/${filename}`;
+  return { buffer, mimeType, ext };
 }

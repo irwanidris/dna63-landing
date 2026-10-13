@@ -3,6 +3,14 @@ import { adminAuth, adminDb } from "../../../lib/firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";
 import { saveBase64Image } from "../../../lib/storageUpload";
 import { ensureUserBootstrap } from "../../../lib/bootstrapUser";
+import {
+  PENDING_APPLICATION_MESSAGE,
+  cleanText,
+  isDateString,
+  isTimeString,
+  checkPhotos,
+  hasPendingApplication,
+} from "../../../lib/applyValidation";
 
 export const config = {
   api: {
@@ -16,25 +24,32 @@ const PACKAGES = {
   pakej3: { amount: 360, targetTierKey: "marketing", name: "Pakej 3 - Marketing & Broadcast Promo" },
 };
 
-const REQUIRED_FIELDS = [
-  "businessName",
-  "description",
-  "whatsapp",
-  "category",
-  "address",
-  "lat",
-  "lng",
-  "selectedPackage",
-  "paymentDate",
-  "paymentTime",
-  "pin",
-  "businessHours",
-  "idType",
-  "mykadName",
-  "icNumber",
-  "verifiedPaymentDate",
-  "verifiedPaymentTime",
-];
+// Required text field -> maximum length.
+const TEXT_FIELDS = {
+  businessName: 120,
+  description: 500,
+  whatsapp: 20,
+  category: 60,
+  address: 300,
+  mykadName: 120,
+  icNumber: 30,
+};
+
+const DATE_FIELDS = ["paymentDate", "verifiedPaymentDate"];
+const TIME_FIELDS = ["paymentTime", "verifiedPaymentTime"];
+const DAYS = ["Isnin", "Selasa", "Rabu", "Khamis", "Jumaat", "Sabtu", "Ahad"];
+
+/** Rebuilds businessHours from known days and fields only, or null if malformed. */
+function cleanBusinessHours(input) {
+  if (!input || typeof input !== "object") return null;
+  const hours = {};
+  for (const day of DAYS) {
+    const d = input[day];
+    if (!d || typeof d.isOpen !== "boolean" || !isTimeString(d.open) || !isTimeString(d.close)) return null;
+    hours[day] = { isOpen: d.isOpen, open: d.open, close: d.close };
+  }
+  return hours;
+}
 
 // Padan VendorPinHelper.hash() (DNA63_V2/lib/core/utils/vendor_pin_helper.dart)
 // bit-per-bit -- kalau tak padan, PIN vendor takkan valid dalam app mobile.
@@ -59,14 +74,52 @@ export default async function handler(req, res) {
   } catch {
     return res.status(401).json({ error: "Token tidak sah atau tamat tempoh." });
   }
+  // Any account in the shared Firebase project yields a valid token; only
+  // one that went through phone OTP carries a verified number.
+  if (!decoded.phone_number) {
+    return res.status(401).json({ error: "Sila sahkan nombor telefon anda dahulu." });
+  }
 
   const body = req.body || {};
   const photos = body.photos || {};
 
-  for (const field of REQUIRED_FIELDS) {
-    if (body[field] === undefined || body[field] === null || body[field] === "") {
-      return res.status(400).json({ error: `Medan wajib tiada: ${field}` });
+  const text = {};
+  for (const [field, maxLen] of Object.entries(TEXT_FIELDS)) {
+    text[field] = cleanText(body[field], maxLen);
+    if (!text[field]) {
+      return res.status(400).json({ error: `Medan wajib tiada atau tidak sah: ${field}` });
     }
+  }
+  for (const field of DATE_FIELDS) {
+    if (!isDateString(body[field])) {
+      return res.status(400).json({ error: `Tarikh tidak sah: ${field}` });
+    }
+  }
+  for (const field of TIME_FIELDS) {
+    if (!isTimeString(body[field])) {
+      return res.status(400).json({ error: `Masa tidak sah: ${field}` });
+    }
+  }
+  const lat = Number(body.lat);
+  const lng = Number(body.lng);
+  const hasCoords = body.lat !== "" && body.lat != null && body.lng !== "" && body.lng != null;
+  if (!hasCoords || !Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return res.status(400).json({ error: "Lokasi gerai/premis tidak sah." });
+  }
+  const businessHours = cleanBusinessHours(body.businessHours);
+  if (!businessHours) {
+    return res.status(400).json({ error: "Masa operasi tidak sah." });
+  }
+  if (body.idType !== "mykad" && body.idType !== "passport") {
+    return res.status(400).json({ error: "Jenis dokumen pengenalan tidak sah." });
+  }
+  const ssmNumber = body.ssmNumber ? cleanText(body.ssmNumber, 40) : "";
+  if (ssmNumber === null) {
+    return res.status(400).json({ error: "No. Pendaftaran SSM tidak sah." });
+  }
+  const passportCountry = body.idType === "passport" ? cleanText(body.passportCountry, 60) : "";
+  if (passportCountry === null) {
+    return res.status(400).json({ error: "Sila isi Negara Pengeluar Passport." });
   }
   if (!photos.shopPhoto) {
     return res.status(400).json({ error: "Gambar premis/gerai wajib." });
@@ -74,15 +127,12 @@ export default async function handler(req, res) {
   if (!photos.resitPhoto) {
     return res.status(400).json({ error: "Resit pembayaran wajib." });
   }
-  if (String(body.pin).length < 6) {
+  if (typeof body.pin !== "string" || !/^\d{6}$/.test(body.pin.trim())) {
     return res.status(400).json({ error: "PIN mestilah 6-digit." });
   }
-  const pkg = PACKAGES[body.selectedPackage];
+  const pkg = Object.hasOwn(PACKAGES, body.selectedPackage) ? PACKAGES[body.selectedPackage] : null;
   if (!pkg) {
     return res.status(400).json({ error: "Pakej tidak sah." });
-  }
-  if (body.idType === "passport" && !body.passportCountry) {
-    return res.status(400).json({ error: "Sila isi Negara Pengeluar Passport." });
   }
   if (!body.agreedToVerifiedTerms) {
     return res.status(400).json({ error: "Sila bersetuju dengan Terma & Syarat Verifikasi." });
@@ -93,12 +143,21 @@ export default async function handler(req, res) {
   if (!photos.verifiedResitPhoto) {
     return res.status(400).json({ error: "Resit bayaran Verified (RM50) wajib." });
   }
+  const photoKeys = ["shopPhoto", "resitPhoto", "mykadPhoto", "verifiedResitPhoto", ...(photos.ssmPhoto ? ["ssmPhoto"] : [])];
+  const photoError = checkPhotos(photos, photoKeys);
+  if (photoError) {
+    return res.status(400).json({ error: photoError });
+  }
 
   const uid = decoded.uid;
 
+  if (await hasPendingApplication("vendor_applications", uid)) {
+    return res.status(409).json({ error: PENDING_APPLICATION_MESSAGE });
+  }
+
   await ensureUserBootstrap(uid, {
-    name: body.businessName,
-    phone: decoded.phone_number || "",
+    name: text.businessName,
+    phone: decoded.phone_number,
   });
 
   const shopPhotoUrl = await saveBase64Image(photos.shopPhoto, `vendor_docs/${uid}_shop`);
@@ -113,14 +172,10 @@ export default async function handler(req, res) {
   const applicationRef = await adminDb.collection("vendor_applications").add({
     uid,
     email: "",
-    businessName: String(body.businessName).trim(),
-    description: String(body.description).trim(),
-    whatsapp: String(body.whatsapp).trim(),
-    ssmNumber: body.ssmNumber ? String(body.ssmNumber).trim() : "",
-    category: String(body.category).trim(),
-    address: String(body.address).trim(),
-    lat: Number(body.lat),
-    lng: Number(body.lng),
+    ...text,
+    ssmNumber,
+    lat,
+    lng,
     shopPhotoUrl,
     ssmPhotoUrl,
     resitPhotoUrl,
@@ -130,15 +185,13 @@ export default async function handler(req, res) {
     amount: pkg.amount,
     paymentDate: body.paymentDate,
     paymentTime: body.paymentTime,
-    vendorPinHash: hashVendorPin(String(body.pin).trim(), uid),
+    vendorPinHash: hashVendorPin(body.pin.trim(), uid),
     status: "PENDING",
     createdAt: FieldValue.serverTimestamp(),
-    businessHours: body.businessHours,
+    businessHours,
     source: "public_web",
     idType: body.idType,
-    mykadName: String(body.mykadName).trim(),
-    icNumber: String(body.icNumber).trim(),
-    passportCountry: body.idType === "passport" ? String(body.passportCountry || "").trim() : "",
+    passportCountry,
     mykadPhotoUrl,
     verifiedPaymentDate: body.verifiedPaymentDate,
     verifiedPaymentTime: body.verifiedPaymentTime,
@@ -148,7 +201,7 @@ export default async function handler(req, res) {
 
   await adminDb.collection("admin_notifications").add({
     title: `Permohonan Vendor Baru & Bayaran ${pkg.name}`,
-    body: `${body.businessName} mendaftar sebagai Vendor (${pkg.name} - RM ${pkg.amount}/tahun). Sila sahkan resit.`,
+    body: `${text.businessName} mendaftar sebagai Vendor (${pkg.name} - RM ${pkg.amount}/tahun). Sila sahkan resit.`,
     type: "NEW_VENDOR_APP",
     isSeen: false,
     createdAt: FieldValue.serverTimestamp(),

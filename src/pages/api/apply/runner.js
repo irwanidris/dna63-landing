@@ -3,6 +3,13 @@ import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { saveBase64Image } from "../../../lib/storageUpload";
 import { extractMyKad } from "../../../lib/mykadOcr";
 import { ensureUserBootstrap } from "../../../lib/bootstrapUser";
+import {
+  PENDING_APPLICATION_MESSAGE,
+  cleanText,
+  isDateString,
+  checkPhotos,
+  hasPendingApplication,
+} from "../../../lib/applyValidation";
 
 export const config = {
   api: {
@@ -25,25 +32,23 @@ const PHOTO_FIELD_MAP = {
   payment_qr: "paymentQrUrl",
 };
 
-const REQUIRED_FIELDS = [
-  "fullName",
-  "icNumber",
-  "emergencyName",
-  "emergencyPhone",
-  "vehicleType",
-  "vehiclePlate",
-  "vehicleModel",
-  "bankName",
-  "bankAccountNumber",
-  "bankHolderName",
-  "parlimen",
-  "dun",
-  "licenseExpiryDate",
-  "roadtaxExpiryDate",
-  "insuranceExpiryDate",
-  "hasNoCriminalRecord",
-  "isFitToWork",
-];
+// Required text field -> maximum length.
+const TEXT_FIELDS = {
+  fullName: 120,
+  icNumber: 20,
+  emergencyName: 120,
+  emergencyPhone: 20,
+  vehicleType: 40,
+  vehiclePlate: 20,
+  vehicleModel: 80,
+  bankName: 80,
+  bankAccountNumber: 40,
+  bankHolderName: 120,
+  parlimen: 80,
+  dun: 80,
+};
+
+const DATE_FIELDS = ["licenseExpiryDate", "roadtaxExpiryDate", "insuranceExpiryDate"];
 
 function extractBase64(dataUrl) {
   const match = typeof dataUrl === "string" && dataUrl.match(/^data:image\/[a-z]+;base64,(.+)$/);
@@ -67,29 +72,44 @@ export default async function handler(req, res) {
   } catch {
     return res.status(401).json({ error: "Token tidak sah atau tamat tempoh." });
   }
+  // Any account in the shared Firebase project yields a valid token; only
+  // one that went through phone OTP carries a verified number.
+  if (!decoded.phone_number) {
+    return res.status(401).json({ error: "Sila sahkan nombor telefon anda dahulu." });
+  }
 
   const body = req.body || {};
   const photos = body.photos || {};
 
-  for (const field of REQUIRED_FIELDS) {
-    if (body[field] === undefined || body[field] === null || body[field] === "") {
-      return res.status(400).json({ error: `Medan wajib tiada: ${field}` });
+  const text = {};
+  for (const [field, maxLen] of Object.entries(TEXT_FIELDS)) {
+    text[field] = cleanText(body[field], maxLen);
+    if (!text[field]) {
+      return res.status(400).json({ error: `Medan wajib tiada atau tidak sah: ${field}` });
     }
   }
-  if (!body.hasNoCriminalRecord || !body.isFitToWork) {
+  for (const field of DATE_FIELDS) {
+    if (!isDateString(body[field])) {
+      return res.status(400).json({ error: `Tarikh tidak sah: ${field}` });
+    }
+  }
+  if (body.hasNoCriminalRecord !== true || body.isFitToWork !== true) {
     return res.status(400).json({ error: "Sila sahkan semua akuan & terma perkhidmatan." });
   }
-  for (const type of Object.keys(PHOTO_FIELD_MAP)) {
-    if (!photos[type]) {
-      return res.status(400).json({ error: `Gambar wajib tiada: ${type}` });
-    }
+  const photoError = checkPhotos(photos, Object.keys(PHOTO_FIELD_MAP));
+  if (photoError) {
+    return res.status(400).json({ error: photoError });
   }
 
   const uid = decoded.uid;
 
+  if (await hasPendingApplication("rider_applications", uid)) {
+    return res.status(409).json({ error: PENDING_APPLICATION_MESSAGE });
+  }
+
   await ensureUserBootstrap(uid, {
-    name: body.fullName,
-    phone: decoded.phone_number || body.phone || "",
+    name: text.fullName,
+    phone: decoded.phone_number,
   });
 
   const photoUrls = {};
@@ -104,7 +124,7 @@ export default async function handler(req, res) {
     try {
       const ocrResult = await extractMyKad(icBase64);
       if (ocrResult.success) {
-        const typedIc = String(body.icNumber).replace(/-/g, "");
+        const typedIc = text.icNumber.replace(/-/g, "");
         icOcrVerified = ocrResult.icNumber === typedIc;
       }
     } catch (err) {
@@ -115,19 +135,9 @@ export default async function handler(req, res) {
   const applicationRef = await adminDb.collection("rider_applications").add({
     uid,
     email: "",
-    fullName: String(body.fullName).trim(),
-    icNumber: String(body.icNumber).trim(),
-    phone: decoded.phone_number || body.phone || "",
-    emergencyName: String(body.emergencyName).trim(),
-    emergencyPhone: String(body.emergencyPhone).trim(),
-    vehicleType: body.vehicleType,
-    vehiclePlate: String(body.vehiclePlate).trim().toUpperCase(),
-    vehicleModel: String(body.vehicleModel).trim(),
-    bankName: String(body.bankName).trim(),
-    bankAccountNumber: String(body.bankAccountNumber).trim(),
-    bankHolderName: String(body.bankHolderName).trim(),
-    parlimen: String(body.parlimen).trim(),
-    dun: String(body.dun).trim(),
+    ...text,
+    vehiclePlate: text.vehiclePlate.toUpperCase(),
+    phone: decoded.phone_number,
     licenseExpiryDate: Timestamp.fromDate(new Date(body.licenseExpiryDate)),
     roadtaxExpiryDate: Timestamp.fromDate(new Date(body.roadtaxExpiryDate)),
     insuranceExpiryDate: Timestamp.fromDate(new Date(body.insuranceExpiryDate)),
@@ -142,7 +152,7 @@ export default async function handler(req, res) {
 
   await adminDb.collection("admin_notifications").add({
     title: "Permohonan Runner Baru",
-    body: `${body.fullName} memohon menjadi Runner DNA63.`,
+    body: `${text.fullName} memohon menjadi Runner DNA63.`,
     type: "NEW_RIDER_APP",
     isSeen: false,
     createdAt: FieldValue.serverTimestamp(),
