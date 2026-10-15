@@ -13,12 +13,12 @@ export default function RelatedArticles({ articles }) {
   return (
     <section className="mt-12 pt-8 border-t border-gray-100 dark:border-gray-800">
       <p className="text-xs font-black uppercase tracking-widest text-gray-400 mb-4">Bacaan berkaitan</p>
-      <div className="grid sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-3 gap-3 sm:gap-6">
         {articles.map((article) => (
           <Link
             key={article.id}
             href={`/berita/${article.slug}`}
-            className="group block bg-white dark:bg-gray-900 rounded-[1.5rem] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-shadow"
+            className="group block bg-white dark:bg-gray-900 rounded-xl sm:rounded-[1.5rem] overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-xl transition-shadow"
           >
             <div className="relative aspect-[4/3] bg-gray-100 dark:bg-gray-800">
               {article.coverImageUrl && (
@@ -31,14 +31,14 @@ export default function RelatedArticles({ articles }) {
                 />
               )}
             </div>
-            <div className="p-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-sabah-blue">
+            <div className="p-2 sm:p-4">
+              <span className="hidden sm:block text-[10px] font-black uppercase tracking-widest text-sabah-blue">
                 {article.category}
               </span>
-              <h3 className="text-base font-bold mt-1 mb-2 group-hover:text-sabah-blue transition-colors line-clamp-3">
+              <h3 className="text-xs sm:text-base font-bold leading-snug sm:mt-1 sm:mb-2 group-hover:text-sabah-blue transition-colors line-clamp-3">
                 {article.title}
               </h3>
-              <p className="text-xs text-gray-400">{formatDate(article.publishedAt)}</p>
+              <p className="hidden sm:block text-xs text-gray-400">{formatDate(article.publishedAt)}</p>
             </div>
           </Link>
         ))}
