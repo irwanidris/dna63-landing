@@ -4,11 +4,10 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/router'
+import { PLAY_STORE_BASE, APP_STORE_BASE } from '../lib/storeLinks'
 
 const MotionLink = motion.create(Link)
 
-const PLAY_STORE_BASE = "https://play.google.com/store/apps/details?id=com.dna63.rhinoresources"
-const APP_STORE_BASE = "https://apps.apple.com/app/dna63-community/id6815618625"
 const playStoreLink = (role) => role ? `${PLAY_STORE_BASE}&referrer=role%3D${role}` : PLAY_STORE_BASE
 const appStoreLink = (role) => role ? `${APP_STORE_BASE}?role=${role}` : APP_STORE_BASE
 
