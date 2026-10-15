@@ -118,6 +118,18 @@ export async function listPublishedArticles({ limit = 50 } = {}) {
   return snap.docs.map(serializeArticle);
 }
 
+/**
+ * Up to `count` other published articles for the end of an article page:
+ * newest in the same category first, topped up with the newest overall.
+ * Reuses the listing query, so it needs no extra Firestore index.
+ */
+export async function listRelatedArticles(article, { count = 3 } = {}) {
+  const others = (await listPublishedArticles({ limit: 30 })).filter((a) => a.id !== article.id);
+  const sameCategory = others.filter((a) => a.category === article.category);
+  const rest = others.filter((a) => a.category !== article.category);
+  return [...sameCategory, ...rest].slice(0, count).map(({ contentHtml, ...card }) => card);
+}
+
 export async function getPublishedArticleBySlug(slug) {
   const snap = await adminDb
     .collection(ARTICLES_COLLECTION)

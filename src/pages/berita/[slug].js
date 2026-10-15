@@ -3,7 +3,8 @@ import Image from "next/image";
 import NewsLayout from "../../components/NewsLayout";
 import dynamic from "next/dynamic";
 import ShareButtons from "../../components/ShareButtons";
-import { getPublishedArticleBySlug } from "../../lib/articles";
+import RelatedArticles from "../../components/RelatedArticles";
+import { getPublishedArticleBySlug, listRelatedArticles } from "../../lib/articles";
 
 const ArticleEditLink = dynamic(() => import("../../components/ArticleEditLink"), { ssr: false });
 
@@ -18,8 +19,15 @@ export async function getServerSideProps({ params, res }) {
       res.setHeader("Cache-Control", "no-store");
       return { notFound: true };
     }
+    // Related reads are optional: a failure here must not hide the article.
+    let related = [];
+    try {
+      related = await listRelatedArticles(article);
+    } catch (err) {
+      console.error("Failed to load related articles", params.slug, err);
+    }
     res.setHeader("Cache-Control", "public, max-age=0, s-maxage=60");
-    return { props: { article } };
+    return { props: { article, related } };
   } catch (err) {
     console.error("Failed to load article", params.slug, err);
     res.setHeader("Cache-Control", "no-store");
@@ -32,7 +40,7 @@ function formatDate(iso) {
   return new Date(iso).toLocaleDateString("ms-MY", { day: "2-digit", month: "long", year: "numeric" });
 }
 
-export default function ArticlePage({ article }) {
+export default function ArticlePage({ article, related }) {
   return (
     <NewsLayout>
       <Head>
@@ -69,6 +77,8 @@ export default function ArticlePage({ article }) {
         />
 
         <ShareButtons url={`https://dna63.com/berita/${article.slug}`} title={article.title} />
+
+        <RelatedArticles articles={related} />
       </article>
     </NewsLayout>
   );
