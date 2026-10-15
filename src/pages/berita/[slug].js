@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import NewsLayout from "../../components/NewsLayout";
 import dynamic from "next/dynamic";
+import ShareButtons from "../../components/ShareButtons";
 import { getPublishedArticleBySlug } from "../../lib/articles";
 
 const ArticleEditLink = dynamic(() => import("../../components/ArticleEditLink"), { ssr: false });
@@ -57,7 +58,7 @@ export default function ArticlePage({ article }) {
         </div>
 
         {article.coverImageUrl && (
-          <div className="relative aspect-video rounded-[2rem] overflow-hidden mb-10 bg-gray-100 dark:bg-gray-800">
+          <div className="relative aspect-[4/3] rounded-[2rem] overflow-hidden mb-10 bg-gray-100 dark:bg-gray-800">
             <Image src={article.coverImageUrl} alt={article.title} fill className="object-cover" unoptimized priority />
           </div>
         )}
@@ -66,6 +67,8 @@ export default function ArticlePage({ article }) {
           className="article-content"
           dangerouslySetInnerHTML={{ __html: article.contentHtml }}
         />
+
+        <ShareButtons url={`https://dna63.com/berita/${article.slug}`} title={article.title} />
       </article>
     </NewsLayout>
   );
